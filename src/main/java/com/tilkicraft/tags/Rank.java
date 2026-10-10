@@ -25,8 +25,10 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
         return List.copyOf(ranks);
     }
     public String prefix(boolean icons) {
-        String badge=icons?ChatColor.WHITE.toString()+(char)(0xeb00+glyph)+" ":"";
-        return badge+label+ChatColor.RESET+" "+color;
+        return badge(icons)+" "+color;
+    }
+    public String badge(boolean icons) {
+        return (icons?ChatColor.WHITE.toString()+(char)(0xeb00+glyph):label)+ChatColor.RESET;
     }
     public String teamName() { return "tt"+String.format(Locale.ROOT,"%04d",9999-priority)+"_"+glyph; }
     public boolean matches(Set<String> memberships, Set<String> explicitRanks) {

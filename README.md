@@ -6,7 +6,7 @@ TilkiCraft için 17 özgün piksel rozet: sohbet, TAB oyuncu listesi ve oyuncunu
 
 ## Kurulum
 
-1. Sunucuyu durdur, `TilkiTags-1.0.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
+1. Sunucuyu durdur, `TilkiTags-1.1.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
 2. Yönetici olarak `/tilkitags setup` çalıştır. 17 kozmetik grup hazırlanır. Mevcut grup üyelikleri veya yetkileri silinmez; gruplara yönetici/Essentials/oyun yetkileri eklenmez. Bunları LuckPerms'te ayrıca yönetirsin.
 3. Grup ata: `/lp user Arda parent add vipplus` veya `/lp user Arda parent add tilki`. `parent add` mevcut başka grupları korur. Kaldırmak için `parent remove <grup>` kullan.
 4. Oyuncu rozet paketini kabul eder; ZIP hazır GitHub bağlantısından indirilir. Sunucuya ZIP koymak gerekmez. Paket varsayılan olarak zorunludur.
@@ -71,4 +71,14 @@ Essentials'ın chat işleyişi kaynağı: https://github.com/EssentialsX/Essenti
 
 `mvn package` (Java 21). `java tools/BuildTagsPack.java` font paketini ve `art/tags-preview.png` dosyasını üretir. `powershell -ExecutionPolicy Bypass -File tools/ValidatePack.ps1` paketi kontrol eder.
 
-Rank önceliği, takma ad/format güvenliği, grup eşlemeleri, 17 rozetin team metin sınırı ve paketsiz fallback için 4 test; bitmap/JSON/ZIP/font/SHA1 kontrolleri vardır. Canlı sunucu/istemciyle henüz test edilmedi. Kontrol edilmesi gerekenler: farklı rütbeler; OP'de varsayılan tag; grup değiştirme; iki oyuncunun TAB ve baş üstü görünümü; paket indirirken metin fallback; Essentials mute/local chat/nick; TilkiStatsHUD panelini aç/kapat; giriş ekranı ve sniper scope.
+Rank önceliği, takma ad/format güvenliği, grup eşlemeleri, 17 rozetin team metin sınırı ve paketsiz fallback için 5 test; bitmap/JSON/ZIP/font/SHA1 kontrolleri vardır. Canlı sunucu/istemciyle henüz test edilmedi. Kontrol edilmesi gerekenler: farklı rütbeler; OP'de varsayılan tag; grup değiştirme; iki oyuncunun TAB ve baş üstü görünümü; paket indirirken metin fallback; Essentials mute/local chat/nick; TilkiStatsHUD panelini aç/kapat; giriş ekranı ve sniper scope.
+
+## 1.1.0 — Tek parça yazılı rozetler
+
+Her rozetin simgesi ve rütbe yazısı artık aynı PNG'nin içindedir. Paket yüklendiğinde tag tek font glifi olarak gönderilir; yanına ayrıca label yazılmaz. Paket indirilene kadar eski metin fallback'i korunur. Rozetler 18 px yüksekliğinde, en fazla 140 px genişliğinde dokulardır; ekranda 9 px yüksekliğinde gösterilir.
+
+TilkiStatsHUD 1.0.1 ile aynı rozet sidebar rütbe satırında ve üst şeritte görünür. HUD, `getRankBadge(subject, viewer)` API'sinden veriyi alır; her oyuncunun kendi paket durumunu dikkate alır. Eski HUD JAR'ı yerine yeni sürüm yüklenmelidir. `sidebar.use-tilkitags: false` ile bu bağlantı kapatılabilir. PAPI/Vault rütbesi bu bağlantı açıkken rozetin önüne geçmez.
+
+Güncelleme: sunucuyu durdur, eski TilkiTags ve TilkiStatsHUD JAR'larını kaldırıp yenilerini koy, yeniden başlat ve oyuna yeniden gir. Mevcut gruplar, üyelikler ve ayarlar korunur. Eski resmi tag paketi URL/SHA1 bilgileri otomatik güncellenir; özel hosting kullanıyorsan yeni ZIP/hash bilgilerini sen güncellemelisin. Gruplar zaten varsa setup tekrar gerekmez. Baked rozet içindeki yazı değişecekse BuildTagsPack.java ile doku yeniden üretilmelidir; config label alanı metin fallback'ini değiştirir.
+
+Doğrulama: 5 rank/glyph/format testi, HUD tarafında 4 test (rozet API sözleşmesi dahil), PNG/JSON/font/ZIP/SHA1 kontrolleri. Canlı istemci görünümü henüz doğrulanmadı.

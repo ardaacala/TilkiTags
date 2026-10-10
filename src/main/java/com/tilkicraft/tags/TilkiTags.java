@@ -43,6 +43,11 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         for(Player player:Bukkit.getOnlinePlayers()) request(player);
     }
     private void readSettings() {
+        if (getConfig().getString("pack.url","").equals("https://github.com/ardaacala/TilkiTags/releases/download/v1.0.0/TilkiTags-ResourcePack.zip")) {
+            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.1.0/TilkiTags-ResourcePack.zip");
+            getConfig().set("pack.sha1","b8206877871cd4859f87f55d0e7b23a336f7ca66");
+            saveConfig();
+        }
         List<Rank> candidate=Rank.load(getConfig().getConfigurationSection("ranks"));
         String template=getConfig().getString("chat.format","{tag}{name}&8 » &f{message}");
         if (!template.contains("{message}") || !template.contains("{name}")) throw new IllegalArgumentException("chat.format needs {name} and {message}");
@@ -82,6 +87,12 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
             }
         }
         return Rank.choose(ranks,memberships,nodes);
+    }
+    /** A single image badge, with a text fallback until this viewer has loaded the pack. */
+    public String getRankBadge(Player subject,Player viewer) {
+        Identity identity=identities.get(subject.getUniqueId());
+        Rank rank=identity==null?resolve(subject):identity.rank();
+        return rank.badge(loaded.contains(viewer.getUniqueId()));
     }
     private void refresh() {
         List<Player> online=new ArrayList<>(Bukkit.getOnlinePlayers());

@@ -37,4 +37,10 @@ class RankTest {
         String format=Rank.chatFormat("{tag}{name} » {message}","VIP ","100%Tilki");
         assertEquals("VIP 100%Tilki » test %s",String.format(format,"unused","test %s"));
     }
+    @Test void loadedBadgeIsOneGlyphWithoutADuplicateTextLabel() throws Exception {
+        for(Rank rank:ranks()) {
+            assertEquals(String.valueOf((char)(0xeb00+rank.glyph())),org.bukkit.ChatColor.stripColor(rank.badge(true)));
+            assertEquals(org.bukkit.ChatColor.stripColor(rank.label()),org.bukkit.ChatColor.stripColor(rank.badge(false)));
+        }
+    }
 }

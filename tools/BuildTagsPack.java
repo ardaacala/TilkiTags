@@ -63,12 +63,64 @@ class BuildTagsPack {
         }
         g.dispose();image.setRGB(31,0,0x01ffffff);return image;
     }
+    // Five-by-seven pixel lettering remains legible without depending on system fonts.
+    static final Map<Character,String> LETTERS=Map.ofEntries(
+        Map.entry('A',"01110/10001/10001/11111/10001/10001/10001"),
+        Map.entry('B',"11110/10001/10001/11110/10001/10001/11110"),
+        Map.entry('C',"01111/10000/10000/10000/10000/10000/01111"),
+        Map.entry('D',"11110/10001/10001/10001/10001/10001/11110"),
+        Map.entry('E',"11111/10000/10000/11110/10000/10000/11111"),
+        Map.entry('F',"11111/10000/10000/11110/10000/10000/10000"),
+        Map.entry('G',"01111/10000/10000/10111/10001/10001/01111"),
+        Map.entry('H',"10001/10001/10001/11111/10001/10001/10001"),
+        Map.entry('I',"11111/00100/00100/00100/00100/00100/11111"),
+        Map.entry('İ',"00100/00000/01110/00100/00100/00100/01110"),
+        Map.entry('K',"10001/10010/10100/11000/10100/10010/10001"),
+        Map.entry('L',"10000/10000/10000/10000/10000/10000/11111"),
+        Map.entry('M',"10001/11011/10101/10101/10001/10001/10001"),
+        Map.entry('N',"10001/11001/10101/10011/10001/10001/10001"),
+        Map.entry('O',"01110/10001/10001/10001/10001/10001/01110"),
+        Map.entry('P',"11110/10001/10001/11110/10000/10000/10000"),
+        Map.entry('R',"11110/10001/10001/11110/10100/10010/10001"),
+        Map.entry('S',"01111/10000/10000/01110/00001/00001/11110"),
+        Map.entry('Ş',"01111/10000/01110/00001/00001/11110/00100"),
+        Map.entry('T',"11111/00100/00100/00100/00100/00100/00100"),
+        Map.entry('U',"10001/10001/10001/10001/10001/10001/01110"),
+        Map.entry('V',"10001/10001/10001/10001/10001/01010/00100"),
+        Map.entry('Y',"10001/10001/01010/00100/00100/00100/00100"),
+        Map.entry('Z',"11111/00001/00010/00100/01000/10000/11111"),
+        Map.entry('+',"00000/00100/00100/11111/00100/00100/00000")
+    );
+    static BufferedImage badge(int index) {
+        int width=16+LABELS[index].length()*6;
+        BufferedImage image=new BufferedImage(width*2,18,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D draw=image.createGraphics(); draw.scale(2,2);
+        int accent=index==0?0x58bee8:COLORS[index];
+        draw.setColor(new Color(0x11131d));draw.fillRect(1,0,width-2,9);draw.fillRect(0,1,width,7);
+        draw.setColor(new Color(accent));draw.fillRect(2,0,width-4,1);draw.fillRect(2,8,width-4,1);draw.fillRect(0,2,1,5);draw.fillRect(width-1,2,1,5);
+        draw.setColor(new Color(accent).darker().darker());draw.fillRect(1,1,width-2,7);
+        draw.setColor(new Color(0x152638));draw.fillRect(12,2,width-14,5);
+        draw.setColor(new Color(255,255,255,35));draw.fillRect(12,1,width-14,1);
+        draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        draw.drawImage(icon(index),1,0,10,9,null);
+        for(int letter=0;letter<LABELS[index].length();letter++) {
+            char character=LABELS[index].charAt(letter);
+            String pattern=LETTERS.get(character);
+            if(pattern==null) throw new IllegalArgumentException("Missing badge letter: "+character);
+            String[] rows=pattern.split("/");int x=14+letter*6;
+            draw.setColor(new Color(0x080e18));
+            for(int y=0;y<7;y++)for(int column=0;column<5;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column+1,y+2,1,1);
+            draw.setColor(index==16?new Color(0xffeeb7):Color.WHITE);
+            for(int y=0;y<7;y++)for(int column=0;column<5;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column,y+1,1,1);
+        }
+        draw.dispose();return image;
+    }
     public static void main(String[] args) throws Exception {
         Path root=Path.of("resourcepack");
         Path textures=root.resolve("assets/tilkitags/textures/font");Files.createDirectories(textures);
         List<String> providers=new ArrayList<>();List<BufferedImage> icons=new ArrayList<>();
         for(int i=0;i<IDS.length;i++) {
-            BufferedImage image=icon(i);icons.add(image);ImageIO.write(image,"png",textures.resolve(IDS[i]+".png").toFile());
+            BufferedImage image=badge(i);icons.add(image);ImageIO.write(image,"png",textures.resolve(IDS[i]+".png").toFile());
             providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":9,\"ascent\":8,\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
         }
         write(root,"pack.mcmeta","{\"pack\":{\"pack_format\":46,\"description\":\"TilkiCraft - 17 original rank badges | 1.21.4\"}}\n");
@@ -87,8 +139,8 @@ class BuildTagsPack {
         g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xaab1c2);g.drawString("17 özgün piksel simge • Sohbet / TAB / Oyuncu üstü • Tasarım önizlemesi",30,72);
         for(int i=0;i<17;i++) {
             int x=25+i%4*295,y=100+i/4*110;rect(0x242936,x,y,280,96);rect(COLORS[i],x,y,3,96);
-            g.drawImage(icons.get(i),x+12,y+13,64,64,null);g.setFont(new Font("SansSerif",Font.BOLD,i>=14?17:20));color(COLORS[i]);g.drawString(LABELS[i],x+86,y+38);
-            g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xdce0e8);g.drawString("Arda  »  Merhaba!",x+86,y+64);
+            g.drawImage(icons.get(i),x+12,y+13,icons.get(i).getWidth()*3/2,27,null);
+            g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xdce0e8);g.drawString("Arda  »  Merhaba!",x+12,y+70);
         }
         g.dispose();Files.createDirectories(Path.of("art"));ImageIO.write(preview,"png",Path.of("art/tags-preview.png").toFile());
         System.out.println("Built 17 rank badges. SHA1: "+hash);
