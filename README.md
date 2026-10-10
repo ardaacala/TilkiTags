@@ -6,7 +6,7 @@ TilkiCraft için 17 özgün piksel rozet: sohbet, TAB oyuncu listesi ve oyuncunu
 
 ## Kurulum
 
-1. Sunucuyu durdur, `TilkiTags-1.1.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
+1. Sunucuyu durdur, `TilkiTags-1.2.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
 2. Yönetici olarak `/tilkitags setup` çalıştır. 17 kozmetik grup hazırlanır. Mevcut grup üyelikleri veya yetkileri silinmez; gruplara yönetici/Essentials/oyun yetkileri eklenmez. Bunları LuckPerms'te ayrıca yönetirsin.
 3. Grup ata: `/lp user Arda parent add vipplus` veya `/lp user Arda parent add tilki`. `parent add` mevcut başka grupları korur. Kaldırmak için `parent remove <grup>` kullan.
 4. Oyuncu rozet paketini kabul eder; ZIP hazır GitHub bağlantısından indirilir. Sunucuya ZIP koymak gerekmez. Paket varsayılan olarak zorunludur.
@@ -82,3 +82,6 @@ TilkiStatsHUD 1.0.1 ile aynı rozet sidebar rütbe satırında ve üst şeritte 
 Güncelleme: sunucuyu durdur, eski TilkiTags ve TilkiStatsHUD JAR'larını kaldırıp yenilerini koy, yeniden başlat ve oyuna yeniden gir. Mevcut gruplar, üyelikler ve ayarlar korunur. Eski resmi tag paketi URL/SHA1 bilgileri otomatik güncellenir; özel hosting kullanıyorsan yeni ZIP/hash bilgilerini sen güncellemelisin. Gruplar zaten varsa setup tekrar gerekmez. Baked rozet içindeki yazı değişecekse BuildTagsPack.java ile doku yeniden üretilmelidir; config label alanı metin fallback'ini değiştirir.
 
 Doğrulama: 5 rank/glyph/format testi, HUD tarafında 4 test (rozet API sözleşmesi dahil), PNG/JSON/font/ZIP/SHA1 kontrolleri. Canlı istemci görünümü henüz doğrulanmadı.
+## 1.2.0 — Beyaz isimler ve piksel yazı
+
+Chat, TAB ve oyuncu üzerindeki isimler beyazdır. Essentials takma adlarının renk/kalınlık kodları temizlenir. Rozet renkleri korunur; yazılar kalın piksel harflerle çizilir. En yüksek VIP rozeti `Tilki` olarak yazılır. Eski config dosyalarındaki isim renkleri bu davranışı değiştirmez.

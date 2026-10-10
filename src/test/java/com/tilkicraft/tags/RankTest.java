@@ -35,12 +35,24 @@ class RankTest {
     }
     @Test void chatDoesNotInterpretPercentSignsInNicknamesAsFormatArguments() {
         String format=Rank.chatFormat("{tag}{name} » {message}","VIP ","100%Tilki");
-        assertEquals("VIP 100%Tilki » test %s",String.format(format,"unused","test %s"));
+        assertEquals("VIP §f100%Tilki » test %s",String.format(format,"unused","test %s"));
+    }
+    @Test void everyRankUsesWhiteNamesEvenWithAnOldColoredConfig() throws Exception {
+        for(Rank rank:ranks()) assertTrue(rank.prefix(true).endsWith("§f"),rank.id());
+        assertEquals("§fArda",Rank.whiteName("&c&lAr&bda"));
+        String format=Rank.chatFormat("{tag}{name}&8 » &f{message}","§6VIP ","§c§lArda");
+        assertEquals("§6VIP §fArda§8 » §ftest",String.format(format,"unused","test"));
     }
     @Test void loadedBadgeIsOneGlyphWithoutADuplicateTextLabel() throws Exception {
         for(Rank rank:ranks()) {
             assertEquals(String.valueOf((char)(0xeb00+rank.glyph())),org.bukkit.ChatColor.stripColor(rank.badge(true)));
             assertEquals(org.bukkit.ChatColor.stripColor(rank.label()),org.bukkit.ChatColor.stripColor(rank.badge(false)));
         }
+    }
+    @Test void unresolvedOrFormattedIslandLevelsAreSafeForCachedChatPrefixes() {
+        assertEquals("1.4M",Rank.cleanLevel("§e1.4M"));
+        assertEquals("0",Rank.cleanLevel("%superior_island_level_format%"));
+        assertEquals("0",Rank.cleanLevel(null));
+        assertEquals("0",Rank.cleanLevel("%2$s"));
     }
 }

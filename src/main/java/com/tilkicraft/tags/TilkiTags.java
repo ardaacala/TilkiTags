@@ -29,9 +29,9 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
     private String url;
     private byte[] hash;
     private Object essentials;
-    private Method getUser, getNickname;
+    private Method getUser, getNickname, placeholders;
     private boolean setupRunning;
-    private record Identity(Rank rank,String nickname) {}
+    private record Identity(Rank rank,String nickname,String islandLevel) {}
 
     @Override public void onEnable() {
         saveDefaultConfig(); luckPerms=LuckPermsProvider.get();
@@ -43,10 +43,14 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         for(Player player:Bukkit.getOnlinePlayers()) request(player);
     }
     private void readSettings() {
-        if (getConfig().getString("pack.url","").equals("https://github.com/ardaacala/TilkiTags/releases/download/v1.0.0/TilkiTags-ResourcePack.zip")) {
-            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.1.0/TilkiTags-ResourcePack.zip");
-            getConfig().set("pack.sha1","b8206877871cd4859f87f55d0e7b23a336f7ca66");
+        String previousUrl=getConfig().getString("pack.url","");
+        if (previousUrl.equals("https://github.com/ardaacala/TilkiTags/releases/download/v1.0.0/TilkiTags-ResourcePack.zip") || previousUrl.equals("https://github.com/ardaacala/TilkiTags/releases/download/v1.1.0/TilkiTags-ResourcePack.zip")) {
+            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.2.0/TilkiTags-ResourcePack.zip");
+            getConfig().set("pack.sha1","1be2b09d52f2b5b76093bc63521950ebc129acd7");
             saveConfig();
+        }
+        if (getConfig().isConfigurationSection("ranks.tilki") && !"&6&lTilki".equals(getConfig().getString("ranks.tilki.label"))) {
+            getConfig().set("ranks.tilki.label","&6&lTilki"); saveConfig();
         }
         List<Rank> candidate=Rank.load(getConfig().getConfigurationSection("ranks"));
         String template=getConfig().getString("chat.format","{tag}{name}&8 » &f{message}");
@@ -59,19 +63,33 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         ranks=candidate;chatTemplate=template;chatEnabled=getConfig().getBoolean("chat.enabled",true);url=candidateUrl;hash=candidateHash;
     }
     private void bindEssentials() {
+        placeholders=null;
+        var papi=Bukkit.getPluginManager().getPlugin("PlaceholderAPI");
+        if (papi!=null && papi.isEnabled()) try {
+            placeholders=Class.forName("me.clip.placeholderapi.PlaceholderAPI",true,papi.getClass().getClassLoader()).getMethod("setPlaceholders",OfflinePlayer.class,String.class);
+        } catch (ReflectiveOperationException ex) { getLogger().warning("PlaceholderAPI hook unavailable; island level defaults to 0."); }
         essentials=Bukkit.getPluginManager().getPlugin("Essentials");
         if (essentials!=null) try {
             getUser=essentials.getClass().getMethod("getUser",UUID.class);
             getNickname=getUser.getReturnType().getMethod("getNickname");
         } catch (ReflectiveOperationException ex) { essentials=null; getLogger().warning("Essentials nickname hook unavailable; real names will be used."); }
     }
+    private String islandLevel(Player player) {
+        if(placeholders!=null) try {
+            return Rank.cleanLevel((String)placeholders.invoke(null,player,getConfig().getString("island-level.placeholder","%superior_island_level_format%")));
+        } catch(ReflectiveOperationException ignored) { }
+        return "0";
+    }
+    private String identityPrefix(Identity identity,boolean icons) {
+        return "§7"+identity.islandLevel()+" §8▪ "+identity.rank().prefix(icons);
+    }
     private String nickname(Player player) {
         if (essentials!=null) try {
             Object user=getUser.invoke(essentials,player.getUniqueId());
             String nick=user==null?null:(String)getNickname.invoke(user);
-            if (nick!=null && !nick.isBlank()) return ChatColor.translateAlternateColorCodes('&',nick);
+            if (nick!=null && !nick.isBlank()) return Rank.whiteName(nick);
         } catch (ReflectiveOperationException ignored) { }
-        return player.getName();
+        return Rank.whiteName(player.getName());
     }
     private Rank resolve(Player player) {
         User user=luckPerms.getUserManager().getUser(player.getUniqueId());
@@ -101,10 +119,10 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         Map<Scoreboard,Boolean> boards=new IdentityHashMap<>();
         for(Player player:online) {
             UUID id=player.getUniqueId(); Rank rank=resolve(player);
-            identities.put(id,new Identity(rank,nickname(player))); onlineNames.add(player.getName());
+            identities.put(id,new Identity(rank,nickname(player),islandLevel(player))); onlineNames.add(player.getName());
             if (getConfig().getBoolean("tab.enabled",true)) {
                 oldTab.putIfAbsent(id,player.getPlayerListName());
-                String value=rank.prefix(allLoaded)+identities.get(id).nickname();
+                String value=identityPrefix(identities.get(id),allLoaded)+identities.get(id).nickname();
                 if (!value.equals(player.getPlayerListName())) player.setPlayerListName(value);
                 lastTab.put(id,value);
             }
@@ -116,6 +134,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
             for(String name:new HashSet<>(owned)) {
                 Team team=board.getTeam(name);
                 if (team!=null) for(String entry:new HashSet<>(team.getEntries())) if(!onlineNames.contains(entry)) team.removeEntry(entry);
+                if(team!=null && team.getEntries().isEmpty()) { team.unregister(); owned.remove(name); }
             }
             for(Player player:online) {
                 Rank rank=identities.get(player.getUniqueId()).rank();
@@ -124,10 +143,10 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
                     if(conflicts.add(player.getName())) getLogger().warning("Another plugin owns "+player.getName()+"'s nametag team; keeping it. Disable the other nametag provider to use TilkiTags.");
                     continue;
                 }
-                String teamName=rank.teamName(); Team team=board.getTeam(teamName);
+                String teamName="tt"+String.format(Locale.ROOT,"%04d%08x",9999-rank.priority(),player.getEntityId()); Team team=board.getTeam(teamName);
                 if (team!=null && !owned.contains(teamName)) continue;
                 if (team==null) { team=board.registerNewTeam(teamName); owned.add(teamName); }
-                team.setPrefix(rank.prefix(viewed.getValue())); team.setColor(rank.color());
+                team.setPrefix(identityPrefix(identities.get(player.getUniqueId()),viewed.getValue())); team.setColor(ChatColor.WHITE);
                 team.setOption(Team.Option.NAME_TAG_VISIBILITY,Team.OptionStatus.ALWAYS);
                 if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
             }
@@ -155,7 +174,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         if(!chatEnabled) return;
         Identity identity=identities.get(event.getPlayer().getUniqueId()); if(identity==null) return;
         boolean icons=event.getRecipients().stream().allMatch(player->loaded.contains(player.getUniqueId()));
-        event.setFormat(Rank.chatFormat(chatTemplate,identity.rank().prefix(icons),identity.nickname()));
+        event.setFormat(Rank.chatFormat(chatTemplate,identityPrefix(identity,icons),identity.nickname()));
     }
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args) {
         String action=args.length==0?"list":args[0].toLowerCase(Locale.ROOT);

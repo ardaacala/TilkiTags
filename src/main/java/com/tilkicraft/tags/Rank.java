@@ -25,7 +25,15 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
         return List.copyOf(ranks);
     }
     public String prefix(boolean icons) {
-        return badge(icons)+" "+color;
+        return badge(icons)+" "+ChatColor.WHITE;
+    }
+    public static String whiteName(String nickname) {
+        return ChatColor.WHITE+ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',nickname));
+    }
+    public static String cleanLevel(String value) {
+        if(value==null) return "0";
+        value=ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',value)).trim();
+        return value.isEmpty() || value.length()>16 || !value.matches("[0-9.,+\\- kKmMbBtT]+") ? "0" : value;
     }
     public String badge(boolean icons) {
         return (icons?ChatColor.WHITE.toString()+(char)(0xeb00+glyph):label)+ChatColor.RESET;
@@ -41,7 +49,7 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
     public static String chatFormat(String template,String prefix,String nickname) {
         // Escape injected percent signs before Java's chat formatter processes %2$s.
         String marker="\u0001MESSAGE\u0001";
-        String format=template.replace("{message}",marker).replace("{tag}",prefix).replace("{name}",nickname);
+        String format=template.replace("{message}",marker).replace("{tag}",prefix).replace("{name}",whiteName(nickname));
         format=ChatColor.translateAlternateColorCodes('&',format).replace("%","%%");
         return format.replace(marker,"%2$s");
     }

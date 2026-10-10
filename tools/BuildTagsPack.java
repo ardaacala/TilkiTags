@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 /** Original deterministic pixel badges, designed for nine-pixel text lines. */
 class BuildTagsPack {
     static final String[] IDS={"oyuncu","rehber","mod","admin","kurucu","toprak","tas","bronz","demir","altin","elmas","netherite","vip","vipplus","megavip","megavipplus","tilki"};
-    static final String[] LABELS={"OYUNCU","REHBER","MOD","ADMIN","KURUCU","TOPRAK","TAŞ","BRONZ","DEMİR","ALTIN","ELMAS","NETHERITE","VIP","VIP+","MEGAVIP","MEGAVIP+","TİLKİ"};
+    static final String[] LABELS={"OYUNCU","REHBER","MOD","ADMIN","KURUCU","TOPRAK","TAŞ","BRONZ","DEMİR","ALTIN","ELMAS","NETHERITE","VIP","VIP+","MEGAVIP","MEGAVIP+","Tilki"};
     static final int[] COLORS={0xc1c8d2,0x67dc86,0x2dbb73,0xf45b56,0xe64d55,0xb7884d,0xa2a6ae,0xcd8c54,0xd7e6eb,0xffd356,0x65e5ed,0x89778f,0xffce4e,0xffdf81,0xcb80ff,0xedb0ff,0xff9735};
     static Graphics2D g;
     static void color(int rgb) {g.setColor(new Color(rgb));}
@@ -65,34 +65,38 @@ class BuildTagsPack {
     }
     // Five-by-seven pixel lettering remains legible without depending on system fonts.
     static final Map<Character,String> LETTERS=Map.ofEntries(
-        Map.entry('A',"01110/10001/10001/11111/10001/10001/10001"),
-        Map.entry('B',"11110/10001/10001/11110/10001/10001/11110"),
-        Map.entry('C',"01111/10000/10000/10000/10000/10000/01111"),
-        Map.entry('D',"11110/10001/10001/10001/10001/10001/11110"),
-        Map.entry('E',"11111/10000/10000/11110/10000/10000/11111"),
+        Map.entry('A',"01110/11011/11011/11111/11011/11011/11011"),
+        Map.entry('B',"11110/11011/11011/11110/11011/11011/11110"),
+        Map.entry('C',"01111/11000/11000/11000/11000/11000/01111"),
+        Map.entry('D',"11110/11011/11011/11011/11011/11011/11110"),
+        Map.entry('E',"11111/11000/11000/11110/11000/11000/11111"),
         Map.entry('F',"11111/10000/10000/11110/10000/10000/10000"),
         Map.entry('G',"01111/10000/10000/10111/10001/10001/01111"),
-        Map.entry('H',"10001/10001/10001/11111/10001/10001/10001"),
-        Map.entry('I',"11111/00100/00100/00100/00100/00100/11111"),
-        Map.entry('İ',"00100/00000/01110/00100/00100/00100/01110"),
-        Map.entry('K',"10001/10010/10100/11000/10100/10010/10001"),
-        Map.entry('L',"10000/10000/10000/10000/10000/10000/11111"),
-        Map.entry('M',"10001/11011/10101/10101/10001/10001/10001"),
-        Map.entry('N',"10001/11001/10101/10011/10001/10001/10001"),
-        Map.entry('O',"01110/10001/10001/10001/10001/10001/01110"),
-        Map.entry('P',"11110/10001/10001/11110/10000/10000/10000"),
-        Map.entry('R',"11110/10001/10001/11110/10100/10010/10001"),
-        Map.entry('S',"01111/10000/10000/01110/00001/00001/11110"),
-        Map.entry('Ş',"01111/10000/01110/00001/00001/11110/00100"),
-        Map.entry('T',"11111/00100/00100/00100/00100/00100/00100"),
-        Map.entry('U',"10001/10001/10001/10001/10001/10001/01110"),
-        Map.entry('V',"10001/10001/10001/10001/10001/01010/00100"),
-        Map.entry('Y',"10001/10001/01010/00100/00100/00100/00100"),
-        Map.entry('Z',"11111/00001/00010/00100/01000/10000/11111"),
-        Map.entry('+',"00000/00100/00100/11111/00100/00100/00000")
+        Map.entry('H',"11011/11011/11011/11111/11011/11011/11011"),
+        Map.entry('I',"1111/0110/0110/0110/0110/0110/1111"),
+        Map.entry('İ',"0110/0000/1111/0110/0110/0110/1111"),
+        Map.entry('K',"11011/11011/11110/11100/11110/11011/11011"),
+        Map.entry('L',"1100/1100/1100/1100/1100/1100/1111"),
+        Map.entry('M',"1100011/1110111/1111111/1101011/1100011/1100011/1100011"),
+        Map.entry('N',"110011/111011/111011/110111/110111/110011/110011"),
+        Map.entry('O',"01110/11011/11011/11011/11011/11011/01110"),
+        Map.entry('P',"11110/11011/11011/11110/11000/11000/11000"),
+        Map.entry('R',"11110/11011/11011/11110/11110/11011/11011"),
+        Map.entry('S',"01111/11000/11000/01110/00011/00011/11110"),
+        Map.entry('Ş',"01111/11000/01110/00011/00011/11110/01100"),
+        Map.entry('T',"111111/001100/001100/001100/001100/001100/001100"),
+        Map.entry('U',"11011/11011/11011/11011/11011/11011/01110"),
+        Map.entry('V',"110011/110011/110011/110011/011110/011110/001100"),
+        Map.entry('Y',"110011/110011/011110/001100/001100/001100/001100"),
+        Map.entry('Z',"11111/00011/00110/01100/11000/11000/11111"),
+        Map.entry('+',"00000/00100/00100/11111/00100/00100/00000"),
+        Map.entry('i',"11/00/11/11/11/11/11"),
+        Map.entry('l',"11/11/11/11/11/11/11"),
+        Map.entry('k',"1100/1100/1101/1110/1110/1101/1101")
     );
     static BufferedImage badge(int index) {
-        int width=16+LABELS[index].length()*6;
+        int textWidth=LABELS[index].chars().map(c->LETTERS.get((char)c).split("/")[0].length()+1).sum()-1;
+        int width=17+textWidth;
         BufferedImage image=new BufferedImage(width*2,18,BufferedImage.TYPE_INT_ARGB);
         Graphics2D draw=image.createGraphics(); draw.scale(2,2);
         int accent=index==0?0x58bee8:COLORS[index];
@@ -103,15 +107,17 @@ class BuildTagsPack {
         draw.setColor(new Color(255,255,255,35));draw.fillRect(12,1,width-14,1);
         draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         draw.drawImage(icon(index),1,0,10,9,null);
+        int cursor=14;
         for(int letter=0;letter<LABELS[index].length();letter++) {
             char character=LABELS[index].charAt(letter);
             String pattern=LETTERS.get(character);
             if(pattern==null) throw new IllegalArgumentException("Missing badge letter: "+character);
-            String[] rows=pattern.split("/");int x=14+letter*6;
+            String[] rows=pattern.split("/");int x=cursor, columns=rows[0].length();
             draw.setColor(new Color(0x080e18));
-            for(int y=0;y<7;y++)for(int column=0;column<5;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column+1,y+2,1,1);
+            for(int y=0;y<7;y++)for(int column=0;column<columns;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column+1,y+2,1,1);
             draw.setColor(index==16?new Color(0xffeeb7):Color.WHITE);
-            for(int y=0;y<7;y++)for(int column=0;column<5;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column,y+1,1,1);
+            for(int y=0;y<7;y++)for(int column=0;column<columns;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column,y+1,1,1);
+            cursor+=columns+1;
         }
         draw.dispose();return image;
     }
