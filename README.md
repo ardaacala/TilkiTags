@@ -33,7 +33,7 @@ Mevcut LuckPerms grupları zaten config'deki adlardan biriyle eşleşiyorsa setu
 | VIP+ | `vipplus` | Altın madalya ve artı |
 | MegaVIP | `megavip` | Mor kristal, altın taç ayrıntısı |
 | MegaVIP+ | `megavipplus` | Mor kristal, taç ve artı |
-| Tilki | `tilki` | Taçlı turuncu tilki, çok renkli kalın yazı |
+| Tilki | `tilki` | Taçlı turuncu tilki, altın renkte `Tilki` yazısı |
 
 `vip+`, `vip_plus`, `megavip+`, `nethrite`, `netherit`, `taş`, `altın`, `owner`, `moderator`, `helper` gibi grup adları da config'deki eşlemelerle tanınır. Kurulum komutu geçerli sade grup adlarını oluşturur: `vipplus`, `megavipplus`, `netherite` vb.
 
@@ -85,3 +85,5 @@ Doğrulama: 5 rank/glyph/format testi, HUD tarafında 4 test (rozet API sözleş
 ## 1.2.0 — Beyaz isimler ve piksel yazı
 
 Chat, TAB ve oyuncu üzerindeki isimler beyazdır. Essentials takma adlarının renk/kalınlık kodları temizlenir. Rozet renkleri korunur; yazılar kalın piksel harflerle çizilir. En yüksek VIP rozeti `Tilki` olarak yazılır. Eski config dosyalarındaki isim renkleri bu davranışı değiştirmez.
+
+Ada seviyesi, PlaceholderAPI üzerinden `%superior_island_level_format%` ile okunur; sohbet, TAB ve avatar üzerinde ismin önünde gösterilir. `island-level.placeholder` ile değiştirilebilir. Çözülmeyen değer 0 olur; diğer eklentilerin Bukkit API çağrıları sohbet iş parçacığında yapılmaz, ana iş parçacığında hazırlanan değer kullanılır.
