@@ -6,7 +6,7 @@ TilkiCraft için 17 özgün piksel rozet: sohbet, TAB oyuncu listesi ve oyuncunu
 
 ## Kurulum
 
-1. Sunucuyu durdur, `TilkiTags-1.2.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
+1. Sunucuyu durdur, `TilkiTags-1.3.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
 2. Yönetici olarak `/tilkitags setup` çalıştır. 17 kozmetik grup hazırlanır. Mevcut grup üyelikleri veya yetkileri silinmez; gruplara yönetici/Essentials/oyun yetkileri eklenmez. Bunları LuckPerms'te ayrıca yönetirsin.
 3. Grup ata: `/lp user Arda parent add vipplus` veya `/lp user Arda parent add tilki`. `parent add` mevcut başka grupları korur. Kaldırmak için `parent remove <grup>` kullan.
 4. Oyuncu rozet paketini kabul eder; ZIP hazır GitHub bağlantısından indirilir. Sunucuya ZIP koymak gerekmez. Paket varsayılan olarak zorunludur.
@@ -87,3 +87,7 @@ Doğrulama: 5 rank/glyph/format testi, HUD tarafında 4 test (rozet API sözleş
 Chat, TAB ve oyuncu üzerindeki isimler beyazdır. Essentials takma adlarının renk/kalınlık kodları temizlenir. Rozet renkleri korunur; yazılar kalın piksel harflerle çizilir. En yüksek VIP rozeti `Tilki` olarak yazılır. Eski config dosyalarındaki isim renkleri bu davranışı değiştirmez.
 
 Ada seviyesi, PlaceholderAPI üzerinden `%superior_island_level_format%` ile okunur; sohbet, TAB ve avatar üzerinde ismin önünde gösterilir. `island-level.placeholder` ile değiştirilebilir. Çözülmeyen değer 0 olur; diğer eklentilerin Bukkit API çağrıları sohbet iş parçacığında yapılmaz, ana iş parçacığında hazırlanan değer kullanılır.
+
+## 1.3.0 — HD rozetler
+
+Rozet yazıları Noto Sans Bold ile antialias kullanılarak 3x çözünürlükte oluşturulur. Dokuz piksel mantıksal satır yüksekliği ve tek parça rozet davranışı korunur. Her rozet hücresi atlasın 256 piksel sınırını aşmaz. Oluşturucu Noto Sans fontunu kardeş TilkiInterface projesinin font klasöründen okur. Ortak paket TilkiResourcePack 1.0.2'dir.

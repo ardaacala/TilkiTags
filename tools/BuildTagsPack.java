@@ -38,8 +38,8 @@ class BuildTagsPack {
     }
     static void plus() {rect(0x17131e,10,0,6,7);rect(0xffffff,12,1,2,5);rect(0xffffff,10,3,6,1);}
     static BufferedImage icon(int index) {
-        BufferedImage image=new BufferedImage(32,32,BufferedImage.TYPE_INT_ARGB);
-        g=image.createGraphics();g.scale(2,2);int base=COLORS[index];
+        BufferedImage image=new BufferedImage(64,64,BufferedImage.TYPE_INT_ARGB);
+        g=image.createGraphics();g.scale(4,4);int base=COLORS[index];
         switch(index) {
             case 0 -> {rect(0x161b24,3,2,10,12);rect(base,4,3,8,10);rect(0xecc6a1,5,6,6,5);rect(0x263446,5,4,6,3);rect(0x253448,6,8,1,1);rect(0x253448,9,8,1,1);rect(0xf6e0c0,7,10,2,1);}
             case 1 -> {rect(0x14251b,1,3,14,11);rect(base,2,4,6,8);rect(0x319d5c,8,4,6,8);rect(0xeaffde,3,5,4,1);rect(0xeaffde,3,7,4,1);rect(0xcef8bf,9,5,3,1);rect(0xffd357,7,1,2,4);}
@@ -61,7 +61,7 @@ class BuildTagsPack {
                 poly(0xffd75c,5,2,6,4,8,1,10,4,11,2,10,5,6,5);rect(0xfff0af,7,3,2,1);
             }
         }
-        g.dispose();image.setRGB(31,0,0x01ffffff);return image;
+        g.dispose();image.setRGB(63,0,0x01ffffff);return image;
     }
     // Five-by-seven pixel lettering remains legible without depending on system fonts.
     static final Map<Character,String> LETTERS=Map.ofEntries(
@@ -94,32 +94,25 @@ class BuildTagsPack {
         Map.entry('l',"11/11/11/11/11/11/11"),
         Map.entry('k',"1100/1100/1101/1110/1110/1101/1101")
     );
-    static BufferedImage badge(int index) {
-        int textWidth=LABELS[index].chars().map(c->LETTERS.get((char)c).split("/")[0].length()+1).sum()-1;
-        int width=17+textWidth;
-        BufferedImage image=new BufferedImage(width*2,18,BufferedImage.TYPE_INT_ARGB);
-        Graphics2D draw=image.createGraphics(); draw.scale(2,2);
+    static BufferedImage badge(int index) throws Exception {
+        Font font=Font.createFont(Font.TRUETYPE_FONT,Path.of("../TilkiInterface/resourcepack/assets/tilkiinterface/font/fonts/modern.ttf").toFile()).deriveFont(Font.BOLD,8f);
+        var context=new java.awt.font.FontRenderContext(null,true,true);
+        int width=18+(int)Math.ceil(font.getStringBounds(LABELS[index],context).getWidth());
+        if(width*3>256) throw new IllegalStateException("HD badge exceeds atlas: "+LABELS[index]);
+        BufferedImage image=new BufferedImage(width*3,27,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D draw=image.createGraphics();draw.scale(3,3);
+        draw.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+        draw.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        draw.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         int accent=index==0?0x58bee8:COLORS[index];
-        draw.setColor(new Color(0x11131d));draw.fillRect(1,0,width-2,9);draw.fillRect(0,1,width,7);
-        draw.setColor(new Color(accent));draw.fillRect(2,0,width-4,1);draw.fillRect(2,8,width-4,1);draw.fillRect(0,2,1,5);draw.fillRect(width-1,2,1,5);
-        draw.setColor(new Color(accent).darker().darker());draw.fillRect(1,1,width-2,7);
-        draw.setColor(new Color(0x152638));draw.fillRect(12,2,width-14,5);
-        draw.setColor(new Color(255,255,255,35));draw.fillRect(12,1,width-14,1);
-        draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        draw.drawImage(icon(index),1,0,10,9,null);
-        int cursor=14;
-        for(int letter=0;letter<LABELS[index].length();letter++) {
-            char character=LABELS[index].charAt(letter);
-            String pattern=LETTERS.get(character);
-            if(pattern==null) throw new IllegalArgumentException("Missing badge letter: "+character);
-            String[] rows=pattern.split("/");int x=cursor, columns=rows[0].length();
-            draw.setColor(new Color(0x080e18));
-            for(int y=0;y<7;y++)for(int column=0;column<columns;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column+1,y+2,1,1);
-            draw.setColor(index==16?new Color(0xffeeb7):Color.WHITE);
-            for(int y=0;y<7;y++)for(int column=0;column<columns;column++)if(rows[y].charAt(column)=='1')draw.fillRect(x+column,y+1,1,1);
-            cursor+=columns+1;
-        }
-        draw.dispose();return image;
+        draw.setColor(new Color(0x10151e));draw.fillRoundRect(0,0,width,9,3,3);
+        draw.setColor(new Color(accent));draw.setStroke(new BasicStroke(.6f));draw.drawRoundRect(0,0,width-1,8,3,3);
+        draw.setPaint(new GradientPaint(0,1,new Color(accent).darker().darker(),0,8,new Color(0x101c2b)));
+        draw.fillRoundRect(1,1,width-2,7,2,2);draw.drawImage(icon(index),1,0,10,9,null);
+        draw.setFont(font);draw.setColor(new Color(0x080e18));draw.drawString(LABELS[index],14.4f,7.5f);
+        draw.setColor(index==16?new Color(0xffeeb7):Color.WHITE);draw.drawString(LABELS[index],14f,7.1f);
+        draw.dispose();image.setRGB(0,0,0);image.setRGB(width*3-1,0,0x01ffffff);return image;
     }
     public static void main(String[] args) throws Exception {
         Path root=Path.of("resourcepack");
@@ -145,7 +138,7 @@ class BuildTagsPack {
         g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xaab1c2);g.drawString("17 özgün piksel simge • Sohbet / TAB / Oyuncu üstü • Tasarım önizlemesi",30,72);
         for(int i=0;i<17;i++) {
             int x=25+i%4*295,y=100+i/4*110;rect(0x242936,x,y,280,96);rect(COLORS[i],x,y,3,96);
-            g.drawImage(icons.get(i),x+12,y+13,icons.get(i).getWidth()*3/2,27,null);
+            g.drawImage(icons.get(i),x+12,y+13,icons.get(i).getWidth(),27,null);
             g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xdce0e8);g.drawString("Arda  »  Merhaba!",x+12,y+70);
         }
         g.dispose();Files.createDirectories(Path.of("art"));ImageIO.write(preview,"png",Path.of("art/tags-preview.png").toFile());

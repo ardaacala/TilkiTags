@@ -44,9 +44,9 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
     }
     private void readSettings() {
         String previousUrl=getConfig().getString("pack.url","");
-        if (previousUrl.equals("https://github.com/ardaacala/TilkiTags/releases/download/v1.0.0/TilkiTags-ResourcePack.zip") || previousUrl.equals("https://github.com/ardaacala/TilkiTags/releases/download/v1.1.0/TilkiTags-ResourcePack.zip")) {
-            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.2.0/TilkiTags-ResourcePack.zip");
-            getConfig().set("pack.sha1","1be2b09d52f2b5b76093bc63521950ebc129acd7");
+        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.0/")) {
+            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.0/TilkiTags-ResourcePack.zip");
+            getConfig().set("pack.sha1","21027f388671f3739e140434bc698a84286d72c9");
             saveConfig();
         }
         if (getConfig().isConfigurationSection("ranks.tilki") && !"&6&lTilki".equals(getConfig().getString("ranks.tilki.label"))) {
