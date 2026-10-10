@@ -134,10 +134,11 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         }
     }
     private void request(Player player) {
+        if(SharedPack.active()) { if(SharedPack.loaded(player)) loaded.add(player.getUniqueId()); return; }
         if(hash==null) return; UUID id=player.getUniqueId();
         Bukkit.getScheduler().runTaskLater(this,()->{
             Player current=Bukkit.getPlayer(id);
-            if(current!=null && hash!=null) current.addResourcePack(PACK,url,hash,getConfig().getString("pack.prompt"),getConfig().getBoolean("pack.required",true));
+            if(!SharedPack.active() && current!=null && hash!=null) current.addResourcePack(PACK,url,hash,getConfig().getString("pack.prompt"),getConfig().getBoolean("pack.required",true));
         },Math.max(1,getConfig().getLong("pack.delay-ticks",140)));
     }
     @EventHandler public void join(PlayerJoinEvent event) { request(event.getPlayer()); }
@@ -145,7 +146,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         UUID id=event.getPlayer().getUniqueId(); loaded.remove(id); identities.remove(id); oldTab.remove(id); lastTab.remove(id); conflicts.remove(event.getPlayer().getName());
     }
     @EventHandler public void pack(PlayerResourcePackStatusEvent event) {
-        if(!PACK.equals(event.getID())) return;
+        if(!SharedPack.matches(PACK,event.getID())) return;
         if(event.getStatus()==PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) loaded.add(event.getPlayer().getUniqueId());
         else if(event.getStatus()!=PlayerResourcePackStatusEvent.Status.ACCEPTED && event.getStatus()!=PlayerResourcePackStatusEvent.Status.DOWNLOADED) loaded.remove(event.getPlayer().getUniqueId());
     }
