@@ -1,0 +1,74 @@
+# TilkiTags
+
+TilkiCraft için 17 özgün piksel rozet: sohbet, TAB oyuncu listesi ve oyuncunun başının üzerinde isim ön eki. Spigot **1.21.4**, Java **21**, LuckPerms **5.x** gerektirir. EssentialsX ve EssentialsXChat isteğe bağlı desteklenir.
+
+![Rozet tasarım önizlemesi](art/tags-preview.png)
+
+## Kurulum
+
+1. Sunucuyu durdur, `TilkiTags-1.0.0.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
+2. Yönetici olarak `/tilkitags setup` çalıştır. 17 kozmetik grup hazırlanır. Mevcut grup üyelikleri veya yetkileri silinmez; gruplara yönetici/Essentials/oyun yetkileri eklenmez. Bunları LuckPerms'te ayrıca yönetirsin.
+3. Grup ata: `/lp user Arda parent add vipplus` veya `/lp user Arda parent add tilki`. `parent add` mevcut başka grupları korur. Kaldırmak için `parent remove <grup>` kullan.
+4. Oyuncu rozet paketini kabul eder; ZIP hazır GitHub bağlantısından indirilir. Sunucuya ZIP koymak gerekmez. Paket varsayılan olarak zorunludur.
+
+Mevcut LuckPerms grupları zaten config'deki adlardan biriyle eşleşiyorsa setup gerekmeden tag görünür. Bilinmeyen gruplarda Oyuncu tagı kullanılır. Grup değişiklikleri yaklaşık yarım saniyede yansır.
+
+## Taglar
+
+| Görünüm | LuckPerms grup adı | Simge |
+|---|---|---|
+| Oyuncu | `oyuncu` veya `default` | Oyuncu portresi |
+| Rehber | `rehber` | Yeşil rehber kitabı |
+| Mod | `mod` | Yeşil şimşek kalkanı |
+| Admin | `admin` | Kırmızı şimşek kalkanı |
+| Kurucu | `kurucu` | Yakutlu altın taç |
+| Toprak | `toprak` | Çimenli toprak bloğu |
+| Taş | `tas` | Taş bloğu |
+| Bronz | `bronz` | Bronz külçe |
+| Demir | `demir` | Demir külçe |
+| Altın | `altin` | Altın külçe |
+| Elmas | `elmas` | Buz mavisi elmas |
+| Netherite | `netherite` | Mor/gri netherite külçesi |
+| VIP | `vip` | Altın yıldız madalyası |
+| VIP+ | `vipplus` | Altın madalya ve artı |
+| MegaVIP | `megavip` | Mor kristal, altın taç ayrıntısı |
+| MegaVIP+ | `megavipplus` | Mor kristal, taç ve artı |
+| Tilki | `tilki` | Taçlı turuncu tilki, çok renkli kalın yazı |
+
+`vip+`, `vip_plus`, `megavip+`, `nethrite`, `netherit`, `taş`, `altın`, `owner`, `moderator`, `helper` gibi grup adları da config'deki eşlemelerle tanınır. Kurulum komutu geçerli sade grup adlarını oluşturur: `vipplus`, `megavipplus`, `netherite` vb.
+
+## Öncelik
+
+Kurucu > Admin > Mod > Rehber > Tilki > MegaVIP+ > MegaVIP > VIP+ > VIP > Netherite > Elmas > Altın > Demir > Bronz > Taş > Toprak > Oyuncu.
+
+Bir kişide birden fazla grup varsa en yüksek öncelikli **tek tag** gösterilir. `ranks.*.priority` ile değiştirilebilir. LuckPerms bağlamları ve miras alınan gruplar dikkate alınır. Ayrıca tam olarak tanımlı `tilkitags.rank.<id>` izinleri desteklenir. Sırf OP olmak veya `*` joker izni almak kişiyi otomatik Kurucu tagına yükseltmez; eşleşen grup veya tam rank izni gerekir.
+
+## Komutlar
+
+- `/tilkitags list` veya `/tilkitags preview`: tüm tagları gör.
+- `/tilkitags setup`: grupları hazırla; `tilkitags.admin` gerekir (varsayılan OP).
+- `/tilkitags reload`: ayarları yenile ve paketi yeniden gönder; yönetici izni gerekir.
+
+## EssentialsXChat ve isimler
+
+Spigot'ta EssentialsXChat'ın normal sohbet işlemlerinden sonra yalnızca mesajın görünen biçimi ayarlanır. Mesaj yeniden yayınlanmaz; alıcı listesi ve iptal durumu korunur. Böylece Essentials'ın mute, yerel sohbet alıcı filtreleri ve sonraki ücret kontrolü çalışmaya devam eder. EssentialsChat'ın kendi `format`/grup formatları yerine `TilkiTags/config.yml` içindeki `chat.format` kullanılır. Varsayılan: `{tag}{name}&8 » &f{message}`.
+
+Essentials `/nick` adları sohbet ve TAB'da okunur. Baş üstü tag, gerçek Minecraft kullanıcı adının önüne scoreboard team prefix'i olarak eklenir; oyuncunun gerçek adı değiştirilmez. Bukkit display name veya LuckPerms prefix meta verisi yazılmadığından iki kez tag eklenmez. Essentials özel mesajlarının ve başka pluginlerin kendi sohbet kanallarının biçimleri değiştirilmez. Paper'ın farklı sohbet pipeline'ı bu sürümde ayrıca doğrulanmamıştır; hedef Spigot'tır.
+
+Essentials'ın chat işleyişi kaynağı: https://github.com/EssentialsX/Essentials/tree/2.x/EssentialsChat/src/main/java/com/earth2me/essentials/chat/processing
+
+## Kaynak paketi ve uyumluluk
+
+- Rozetler özgün, statik 32x32 piksel simgelerdir; 9 px yüksekliğinde font glifi olarak gösterilir. Tasarım önizlemesi simgeleri büyüterek gösterir. `EB00–EB10` ve `tilkitags:badges` namespace'i kullanılır. 256x256 font atlası sınırına uyulur; Unicode font desteği vardır.
+- CombatGuns, TilkiLoginScreen ve TilkiStatsHUD paketlerinin yanına ayrı UUID ile eklenir. Varsayılan istek gecikmesi 140 tick. Title, scope, crosshair veya bossbar'a yazılmaz.
+- Paketi indirmemiş oyuncuya kutu göstermek yerine yazılı tag kullanılır. TAB adı global olduğu için herkesin paketi yüklenene kadar TAB'da metin tagları kullanılır. Sohbette yalnızca mesajın tüm alıcıları hazırsa rozet eklenir. Aynı scoreboard'u paylaşan izleyicilerin hepsi hazırsa o board'da rozet açılır.
+- İsim üstü için oyuncuların o an kullandığı scoreboard'lara yalnızca TilkiTags takımları eklenir. TilkiStatsHUD'ın scoreboard'u değiştirilmez; yeni board oluşturulunca sonraki yenilemede taglar eklenir.
+- Başka pluginin takımı oyuncuyu zaten yönetiyorsa varsayılan `nametag.respect-existing-teams: true` o takımı korur ve konsola bilgi verir. O oyuncunun baş üstü tagı için diğer nametag sağlayıcısını kapat. Ayarı false yapmak takım üyeliğini taşır ve diğer pluginin collision/friendly-fire özelliklerini etkileyebilir. TAB/nametag için tek sağlayıcı kullanılması önerilir.
+- Kapanışta kendi takımları silinir. TAB adı hâlâ bu pluginin yazdığı değerse önceki isim geri yüklenir. Yeni gruplar ve kullanıcı grup üyelikleri silinmez.
+- Hedef istemci 1.21.4. ViaVersion, farklı sürümlerin kaynak paketlerini otomatik uyumlu hâle getirmez. Başka plugin tüm paketleri sıfırlarsa bu paket de yeniden gönderilmelidir.
+
+## Derleme ve doğrulama
+
+`mvn package` (Java 21). `java tools/BuildTagsPack.java` font paketini ve `art/tags-preview.png` dosyasını üretir. `powershell -ExecutionPolicy Bypass -File tools/ValidatePack.ps1` paketi kontrol eder.
+
+Rank önceliği, takma ad/format güvenliği, grup eşlemeleri, 17 rozetin team metin sınırı ve paketsiz fallback için 4 test; bitmap/JSON/ZIP/font/SHA1 kontrolleri vardır. Canlı sunucu/istemciyle henüz test edilmedi. Kontrol edilmesi gerekenler: farklı rütbeler; OP'de varsayılan tag; grup değiştirme; iki oyuncunun TAB ve baş üstü görünümü; paket indirirken metin fallback; Essentials mute/local chat/nick; TilkiStatsHUD panelini aç/kapat; giriş ekranı ve sniper scope.

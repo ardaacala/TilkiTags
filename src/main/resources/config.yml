@@ -1,0 +1,120 @@
+chat:
+  enabled: true
+  # EssentialsXChat susturma, yerel sohbet alıcıları ve ücret kontrolleri korunur.
+  # Sadece görünen biçim değiştirilir; çift prefix oluşmaması için tek tag kullanılır.
+  format: '{tag}{name}&8 » &f{message}'
+tab:
+  enabled: true
+nametag:
+  enabled: true
+  # Başka eklentinin nametag/collision takımını sessizce bozma.
+  respect-existing-teams: true
+pack:
+  url: 'https://github.com/ardaacala/TilkiTags/releases/download/v1.0.0/TilkiTags-ResourcePack.zip'
+  sha1: '106994fd518a1a490034a8a2fec847dec5664409'
+  required: true
+  delay-ticks: 140
+  prompt: 'TilkiCraft rütbe rozetlerini yükle.'
+ranks:
+  oyuncu:
+    groups: [default, oyuncu, player]
+    priority: 0
+    label: '&7OYUNCU'
+    name-color: GRAY
+    glyph: 0
+  rehber:
+    groups: [rehber, helper]
+    priority: 200
+    label: '&a&lREHBER'
+    name-color: GREEN
+    glyph: 1
+  mod:
+    groups: [mod, moderator]
+    priority: 300
+    label: '&2&lMOD'
+    name-color: DARK_GREEN
+    glyph: 2
+  admin:
+    groups: [admin]
+    priority: 400
+    label: '&c&lADMIN'
+    name-color: RED
+    glyph: 3
+  kurucu:
+    groups: [kurucu, owner]
+    priority: 500
+    label: '&4&lKURUCU'
+    name-color: DARK_RED
+    glyph: 4
+  toprak:
+    groups: [toprak]
+    priority: 10
+    label: '&6TOPRAK'
+    name-color: GOLD
+    glyph: 5
+  tas:
+    groups: [tas, taş, stone]
+    priority: 20
+    label: '&7TAŞ'
+    name-color: GRAY
+    glyph: 6
+  bronz:
+    groups: [bronz, bronze]
+    priority: 30
+    label: '&6BRONZ'
+    name-color: GOLD
+    glyph: 7
+  demir:
+    groups: [demir, iron]
+    priority: 40
+    label: '&fDEMİR'
+    name-color: WHITE
+    glyph: 8
+  altin:
+    groups: [altin, altın, gold]
+    priority: 50
+    label: '&eALTIN'
+    name-color: YELLOW
+    glyph: 9
+  elmas:
+    groups: [elmas, diamond]
+    priority: 60
+    label: '&b&lELMAS'
+    name-color: AQUA
+    glyph: 10
+  netherite:
+    groups: [netherite, nethrite, netherit]
+    priority: 70
+    label: '&8&lNETHERITE'
+    name-color: DARK_GRAY
+    glyph: 11
+  vip:
+    groups: [vip]
+    priority: 100
+    label: '&e&lVIP'
+    name-color: YELLOW
+    glyph: 12
+  vipplus:
+    groups: [vipplus, vip+, vip_plus]
+    priority: 110
+    label: '&e&lVIP&f&l+'
+    name-color: YELLOW
+    glyph: 13
+  megavip:
+    groups: [megavip, mega_vip]
+    priority: 120
+    label: '&d&lMEGAVIP'
+    name-color: LIGHT_PURPLE
+    glyph: 14
+  megavipplus:
+    groups: [megavipplus, megavip+, megavip_plus]
+    priority: 130
+    label: '&d&lMEGAVIP&f&l+'
+    name-color: LIGHT_PURPLE
+    glyph: 15
+  tilki:
+    groups: [tilki, fox]
+    priority: 140
+    label: '&6&lT&e&lİ&6&lL&c&lK&6&lİ'
+    name-color: GOLD
+    glyph: 16

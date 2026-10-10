@@ -1,0 +1,13 @@
+name: TilkiTags
+version: 1.0.0
+main: com.tilkicraft.tags.TilkiTags
+api-version: '1.21'
+depend: [LuckPerms]
+softdepend: [Essentials, EssentialsChat, Vault, AuthMe, CombatGuns, TilkiLoginScreen, TilkiStatsHUD]
+commands:
+  tilkitags:
+    description: TilkiCraft tag yönetimi
+    usage: /tilkitags [list|preview|setup|reload]
+permissions:
+  tilkitags.admin:
+    default: op
