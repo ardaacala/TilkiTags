@@ -12,8 +12,8 @@ nametag:
   # Başka eklentinin nametag/collision takımını sessizce bozma.
   respect-existing-teams: true
 pack:
-  url: 'https://github.com/ardaacala/TilkiTags/releases/download/v1.3.2/TilkiTags-ResourcePack.zip'
-  sha1: '848d5848f5666595e1b071a28504231c8bf1c376'
+  url: 'https://github.com/ardaacala/TilkiTags/releases/download/v1.3.3/TilkiTags-ResourcePack.zip'
+  sha1: 'e062b0d71733f4c0cc155c591bdf265a68b19c83'
   required: true
   delay-ticks: 140
   prompt: 'TilkiCraft rütbe rozetlerini yükle.'

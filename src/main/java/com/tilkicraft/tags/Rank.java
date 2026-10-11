@@ -4,7 +4,8 @@ import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
-public record Rank(String id, Set<String> groups, int priority, String label, ChatColor color, ChatColor messageColor, int glyph) {
+public record Rank(String id, Set<String> groups, int priority, String label, ChatColor color, String messageColor, int glyph) {
+    static final String FOX_ORANGE="§x§f§f§8§2§0§0";
     public static List<Rank> load(ConfigurationSection section) {
         if (section==null) throw new IllegalArgumentException("ranks section missing");
         List<Rank> ranks=new ArrayList<>(); Set<Integer> glyphs=new HashSet<>();
@@ -16,8 +17,7 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
             Set<String> groups=new HashSet<>(); value.getStringList("groups").forEach(group->groups.add(group.toLowerCase(Locale.ROOT)));
             ChatColor color=ChatColor.valueOf(value.getString("name-color","WHITE"));
             if (!color.isColor()) throw new IllegalArgumentException("Expected a name color: "+id);
-            ChatColor messageColor=ChatColor.valueOf(value.getString("message-color","WHITE").toUpperCase(Locale.ROOT));
-            if (!messageColor.isColor()) throw new IllegalArgumentException("Expected a message color: "+id);
+            String messageColor=messageColor(value.getString("message-color","WHITE"));
             String label=ChatColor.translateAlternateColorCodes('&',value.getString("label",id));
             if (label.length()>52 || label.contains("%") || label.contains("\n")) throw new IllegalArgumentException("Rank label too long or invalid: "+id);
             ranks.add(new Rank(id,Set.copyOf(groups),priority,label,color,messageColor,glyph));
@@ -51,10 +51,17 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
     public static String chatFormat(String template,String prefix,String nickname) {
         return chatFormat(template,prefix,nickname,null);
     }
-    public static String chatFormat(String template,String prefix,String nickname,ChatColor messageColor) {
+    public static String messageColor(String name) {
+        String normalized=name==null?"WHITE":name.toUpperCase(Locale.ROOT);
+        if(normalized.equals("ORANGE"))return FOX_ORANGE;
+        ChatColor color=ChatColor.valueOf(normalized);
+        if(!color.isColor())throw new IllegalArgumentException("Expected a message color: "+name);
+        return color.toString();
+    }
+    public static String chatFormat(String template,String prefix,String nickname,String messageColor) {
         // Escape injected percent signs before Java's chat formatter processes %2$s.
         String marker="\u0001MESSAGE\u0001";
-        String coloredMarker=(messageColor==null?"":messageColor.toString())+marker;
+        String coloredMarker=(messageColor==null?"":messageColor)+marker;
         String format=template.replace("{message}",coloredMarker).replace("{tag}",prefix).replace("{name}",whiteName(nickname));
         format=ChatColor.translateAlternateColorCodes('&',format).replace("%","%%");
         return format.replace(marker,"%2$s");

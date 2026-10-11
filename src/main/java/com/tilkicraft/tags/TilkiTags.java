@@ -44,9 +44,9 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
     }
     private void readSettings() {
         String previousUrl=getConfig().getString("pack.url","");
-        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.2/")) {
-            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.2/TilkiTags-ResourcePack.zip");
-            getConfig().set("pack.sha1","848d5848f5666595e1b071a28504231c8bf1c376");
+        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.3/")) {
+            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.3/TilkiTags-ResourcePack.zip");
+            getConfig().set("pack.sha1","e062b0d71733f4c0cc155c591bdf265a68b19c83");
             saveConfig();
         }
         if (getConfig().isConfigurationSection("ranks.tilki") && !"&6&lTilki".equals(getConfig().getString("ranks.tilki.label"))) {
@@ -188,12 +188,11 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
             if(args.length!=3) { sender.sendMessage("Kullanım: /tilkitags messagecolor <tag> <renk>"); return true; }
             String rankId=args[1].toLowerCase(Locale.ROOT);
             if(ranks.stream().noneMatch(rank->rank.id().equals(rankId))) { sender.sendMessage("Bilinmeyen tag: "+rankId); return true; }
-            ChatColor color;
-            try { color=ChatColor.valueOf(args[2].toUpperCase(Locale.ROOT)); }
-            catch(IllegalArgumentException ex) { sender.sendMessage("Bilinmeyen renk. Örnek: RED, GOLD, GREEN, AQUA, WHITE"); return true; }
-            if(!color.isColor()) { sender.sendMessage("Biçim değil, bir renk seç: RED, GOLD, GREEN, AQUA, WHITE"); return true; }
-            getConfig().set("ranks."+rankId+".message-color",color.name());saveConfig();readSettings();
-            sender.sendMessage(rankId+" sohbet mesajı rengi "+color.name()+" olarak ayarlandı.");return true;
+            String color=args[2].toUpperCase(Locale.ROOT);
+            try { Rank.messageColor(color); }
+            catch(IllegalArgumentException ex) { sender.sendMessage("Bilinmeyen renk. Örnek: ORANGE, RED, GOLD, GREEN, AQUA, WHITE"); return true; }
+            getConfig().set("ranks."+rankId+".message-color",color);saveConfig();readSettings();
+            sender.sendMessage(rankId+" sohbet mesajı rengi "+color+" olarak ayarlandı.");return true;
         }
         if(action.equals("reload")) {
             reloadConfig();
@@ -209,7 +208,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
     @Override public List<String> onTabComplete(CommandSender sender,Command command,String alias,String[] args) {
         if(args.length==1)return List.of("list","preview","setup","reload","messagecolor").stream().filter(value->value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
         if(args.length==2 && args[0].equalsIgnoreCase("messagecolor"))return ranks.stream().map(Rank::id).filter(id->id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
-        if(args.length==3 && args[0].equalsIgnoreCase("messagecolor"))return Arrays.stream(ChatColor.values()).filter(ChatColor::isColor).map(Enum::name).filter(name->name.startsWith(args[2].toUpperCase(Locale.ROOT))).toList();
+        if(args.length==3 && args[0].equalsIgnoreCase("messagecolor"))return java.util.stream.Stream.concat(java.util.stream.Stream.of("ORANGE"),Arrays.stream(ChatColor.values()).filter(ChatColor::isColor).map(Enum::name)).distinct().filter(name->name.startsWith(args[2].toUpperCase(Locale.ROOT))).toList();
         return List.of();
     }
     private void setup(CommandSender sender) {

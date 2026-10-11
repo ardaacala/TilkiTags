@@ -51,9 +51,10 @@ class RankTest {
     }
     @Test void rankMessageColorOverridesTheGlobalWhiteMessageMarker() throws Exception {
         Rank kurucu=ranks().stream().filter(rank->rank.id().equals("kurucu")).findFirst().orElseThrow();
-        assertEquals(org.bukkit.ChatColor.WHITE,kurucu.messageColor());
-        String format=Rank.chatFormat("{tag}{name}&8 » &f{message}","KURUCU ","Arda",org.bukkit.ChatColor.RED);
+        assertEquals(org.bukkit.ChatColor.WHITE.toString(),kurucu.messageColor());
+        String format=Rank.chatFormat("{tag}{name}&8 » &f{message}","KURUCU ","Arda",org.bukkit.ChatColor.RED.toString());
         assertEquals("KURUCU §fArda§8 » §f§ctest",String.format(format,"unused","test"));
+        assertEquals("§x§f§f§8§2§0§0",Rank.messageColor("orange"));
     }
     @Test void unresolvedOrFormattedIslandLevelsAreSafeForCachedChatPrefixes() {
         assertEquals("1.4M",Rank.cleanLevel("§e1.4M"));

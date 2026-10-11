@@ -130,7 +130,7 @@ class BuildTagsPack {
         }
         int minX=width,minY=height,maxX=0,maxY=0;
         for(int y=0;y<height;y++)for(int x=0;x<width;x++)if(!outside[y*width+x]){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
-        int cropWidth=maxX-minX+1,cropHeight=maxY-minY+1,targetHeight=27,targetWidth=Math.min(255,(int)Math.round(cropWidth*(double)targetHeight/cropHeight));
+        int cropWidth=maxX-minX+1,cropHeight=maxY-minY+1,targetHeight=33,targetWidth=Math.min(255,(int)Math.round(cropWidth*(double)targetHeight/cropHeight));
         BufferedImage transparent=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
         for(int y=0;y<height;y++)for(int x=0;x<width;x++)if(!outside[y*width+x])transparent.setRGB(x,y,source.getRGB(x,y)|0xff000000);
         BufferedImage result=new BufferedImage(targetWidth,targetHeight,BufferedImage.TYPE_INT_ARGB);Graphics2D draw=result.createGraphics();
@@ -145,7 +145,8 @@ class BuildTagsPack {
             Path texture=textures.resolve(IDS[i]+".png");
             BufferedImage image=i==16||!Files.isRegularFile(texture)?badge(i):ImageIO.read(texture.toFile());
             icons.add(image);ImageIO.write(image,"png",texture.toFile());
-            providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":9,\"ascent\":8,\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
+            int logicalHeight=i==16?11:9,ascent=i==16?10:8;
+            providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":"+logicalHeight+",\"ascent\":"+ascent+",\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
         }
         write(root,"pack.mcmeta","{\"pack\":{\"pack_format\":46,\"description\":\"TilkiCraft - 17 original rank badges | 1.21.4\"}}\n");
         write(root,"assets/tilkitags/font/badges.json","{\"providers\":["+String.join(",",providers)+"]}\n");
