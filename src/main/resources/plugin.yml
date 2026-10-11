@@ -1,9 +1,9 @@
 name: TilkiTags
-version: 1.3.0
+version: 1.3.1
 main: com.tilkicraft.tags.TilkiTags
 api-version: '1.21'
 depend: [LuckPerms]
-softdepend: [TilkiResourcePack, PlaceholderAPI, SuperiorSkyblock2, Essentials, EssentialsChat, Vault, AuthMe, CombatGuns, TilkiLoginScreen, TilkiStatsHUD]
+softdepend: [TilkiResourcePack, PlaceholderAPI, SuperiorSkyblock2, Essentials, EssentialsChat, Vault, AuthMe, CombatGuns, TilkiLoginScreen, TilkiInterface]
 commands:
   tilkitags:
     description: TilkiCraft tag yönetimi

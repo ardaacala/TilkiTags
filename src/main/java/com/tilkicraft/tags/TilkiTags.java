@@ -106,15 +106,14 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         }
         return Rank.choose(ranks,memberships,nodes);
     }
-    /** A single image badge, with a text fallback until this viewer has loaded the pack. */
+    /** A stable image badge, independent of other viewers loading their packs. */
     public String getRankBadge(Player subject,Player viewer) {
         Identity identity=identities.get(subject.getUniqueId());
         Rank rank=identity==null?resolve(subject):identity.rank();
-        return rank.badge(loaded.contains(viewer.getUniqueId()));
+        return rank.badge(true);
     }
     private void refresh() {
         List<Player> online=new ArrayList<>(Bukkit.getOnlinePlayers());
-        boolean allLoaded=online.stream().allMatch(player->loaded.contains(player.getUniqueId()));
         Set<String> onlineNames=new HashSet<>();
         Map<Scoreboard,Boolean> boards=new IdentityHashMap<>();
         for(Player player:online) {
@@ -122,7 +121,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
             identities.put(id,new Identity(rank,nickname(player),islandLevel(player))); onlineNames.add(player.getName());
             if (getConfig().getBoolean("tab.enabled",true)) {
                 oldTab.putIfAbsent(id,player.getPlayerListName());
-                String value=identityPrefix(identities.get(id),allLoaded)+identities.get(id).nickname();
+                String value=identityPrefix(identities.get(id),true)+identities.get(id).nickname();
                 if (!value.equals(player.getPlayerListName())) player.setPlayerListName(value);
                 lastTab.put(id,value);
             }
@@ -146,7 +145,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
                 String teamName="tt"+String.format(Locale.ROOT,"%04d%08x",9999-rank.priority(),player.getEntityId()); Team team=board.getTeam(teamName);
                 if (team!=null && !owned.contains(teamName)) continue;
                 if (team==null) { team=board.registerNewTeam(teamName); owned.add(teamName); }
-                team.setPrefix(identityPrefix(identities.get(player.getUniqueId()),viewed.getValue())); team.setColor(ChatColor.WHITE);
+                team.setPrefix(identityPrefix(identities.get(player.getUniqueId()),true)); team.setColor(ChatColor.WHITE);
                 team.setOption(Team.Option.NAME_TAG_VISIBILITY,Team.OptionStatus.ALWAYS);
                 if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
             }
@@ -173,13 +172,13 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
     public void chat(AsyncPlayerChatEvent event) {
         if(!chatEnabled) return;
         Identity identity=identities.get(event.getPlayer().getUniqueId()); if(identity==null) return;
-        boolean icons=event.getRecipients().stream().allMatch(player->loaded.contains(player.getUniqueId()));
+        boolean icons=true;
         event.setFormat(Rank.chatFormat(chatTemplate,identityPrefix(identity,icons),identity.nickname()));
     }
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args) {
         String action=args.length==0?"list":args[0].toLowerCase(Locale.ROOT);
         if(action.equals("list") || action.equals("preview")) {
-            boolean icons=sender instanceof Player player && loaded.contains(player.getUniqueId());
+            boolean icons=sender instanceof Player;
             for(Rank rank:ranks) sender.sendMessage(rank.prefix(icons)+"TilkiCraft");
             return true;
         }
