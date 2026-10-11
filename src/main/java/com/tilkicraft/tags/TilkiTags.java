@@ -15,7 +15,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.*;
 
-public final class TilkiTags extends JavaPlugin implements Listener, CommandExecutor {
+public final class TilkiTags extends JavaPlugin implements Listener, CommandExecutor, TabCompleter {
     private static final UUID PACK=UUID.fromString("70b41c61-5234-487b-a1fb-08c967cf3cd1");
     private LuckPerms luckPerms;
     private List<Rank> ranks=List.of();
@@ -38,15 +38,15 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         try { readSettings(); } catch (RuntimeException ex) { getLogger().severe(ex.getMessage()); Bukkit.getPluginManager().disablePlugin(this); return; }
         bindEssentials();
         Bukkit.getPluginManager().registerEvents(this,this);
-        Objects.requireNonNull(getCommand("tilkitags")).setExecutor(this);
+        PluginCommand tagCommand=Objects.requireNonNull(getCommand("tilkitags"));tagCommand.setExecutor(this);tagCommand.setTabCompleter(this);
         Bukkit.getScheduler().runTaskTimer(this,this::refresh,1,10);
         for(Player player:Bukkit.getOnlinePlayers()) request(player);
     }
     private void readSettings() {
         String previousUrl=getConfig().getString("pack.url","");
-        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.0/")) {
-            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.0/TilkiTags-ResourcePack.zip");
-            getConfig().set("pack.sha1","21027f388671f3739e140434bc698a84286d72c9");
+        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.2/")) {
+            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.2/TilkiTags-ResourcePack.zip");
+            getConfig().set("pack.sha1","848d5848f5666595e1b071a28504231c8bf1c376");
             saveConfig();
         }
         if (getConfig().isConfigurationSection("ranks.tilki") && !"&6&lTilki".equals(getConfig().getString("ranks.tilki.label"))) {
@@ -173,7 +173,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         if(!chatEnabled) return;
         Identity identity=identities.get(event.getPlayer().getUniqueId()); if(identity==null) return;
         boolean icons=true;
-        event.setFormat(Rank.chatFormat(chatTemplate,identityPrefix(identity,icons),identity.nickname()));
+        event.setFormat(Rank.chatFormat(chatTemplate,identityPrefix(identity,icons),identity.nickname(),identity.rank().messageColor()));
     }
     @Override public boolean onCommand(CommandSender sender,Command command,String label,String[] args) {
         String action=args.length==0?"list":args[0].toLowerCase(Locale.ROOT);
@@ -184,6 +184,17 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         }
         if(!sender.hasPermission("tilkitags.admin")) { sender.sendMessage("Yetkin yok."); return true; }
         if(action.equals("setup")) { setup(sender); return true; }
+        if(action.equals("messagecolor")) {
+            if(args.length!=3) { sender.sendMessage("Kullanım: /tilkitags messagecolor <tag> <renk>"); return true; }
+            String rankId=args[1].toLowerCase(Locale.ROOT);
+            if(ranks.stream().noneMatch(rank->rank.id().equals(rankId))) { sender.sendMessage("Bilinmeyen tag: "+rankId); return true; }
+            ChatColor color;
+            try { color=ChatColor.valueOf(args[2].toUpperCase(Locale.ROOT)); }
+            catch(IllegalArgumentException ex) { sender.sendMessage("Bilinmeyen renk. Örnek: RED, GOLD, GREEN, AQUA, WHITE"); return true; }
+            if(!color.isColor()) { sender.sendMessage("Biçim değil, bir renk seç: RED, GOLD, GREEN, AQUA, WHITE"); return true; }
+            getConfig().set("ranks."+rankId+".message-color",color.name());saveConfig();readSettings();
+            sender.sendMessage(rankId+" sohbet mesajı rengi "+color.name()+" olarak ayarlandı.");return true;
+        }
         if(action.equals("reload")) {
             reloadConfig();
             try {
@@ -194,6 +205,12 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
             return true;
         }
         return false;
+    }
+    @Override public List<String> onTabComplete(CommandSender sender,Command command,String alias,String[] args) {
+        if(args.length==1)return List.of("list","preview","setup","reload","messagecolor").stream().filter(value->value.startsWith(args[0].toLowerCase(Locale.ROOT))).toList();
+        if(args.length==2 && args[0].equalsIgnoreCase("messagecolor"))return ranks.stream().map(Rank::id).filter(id->id.startsWith(args[1].toLowerCase(Locale.ROOT))).toList();
+        if(args.length==3 && args[0].equalsIgnoreCase("messagecolor"))return Arrays.stream(ChatColor.values()).filter(ChatColor::isColor).map(Enum::name).filter(name->name.startsWith(args[2].toUpperCase(Locale.ROOT))).toList();
+        return List.of();
     }
     private void setup(CommandSender sender) {
         if(setupRunning) { sender.sendMessage("Kurulum zaten çalışıyor."); return; }

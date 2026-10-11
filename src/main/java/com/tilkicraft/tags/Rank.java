@@ -4,7 +4,7 @@ import java.util.*;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
-public record Rank(String id, Set<String> groups, int priority, String label, ChatColor color, int glyph) {
+public record Rank(String id, Set<String> groups, int priority, String label, ChatColor color, ChatColor messageColor, int glyph) {
     public static List<Rank> load(ConfigurationSection section) {
         if (section==null) throw new IllegalArgumentException("ranks section missing");
         List<Rank> ranks=new ArrayList<>(); Set<Integer> glyphs=new HashSet<>();
@@ -16,9 +16,11 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
             Set<String> groups=new HashSet<>(); value.getStringList("groups").forEach(group->groups.add(group.toLowerCase(Locale.ROOT)));
             ChatColor color=ChatColor.valueOf(value.getString("name-color","WHITE"));
             if (!color.isColor()) throw new IllegalArgumentException("Expected a name color: "+id);
+            ChatColor messageColor=ChatColor.valueOf(value.getString("message-color","WHITE").toUpperCase(Locale.ROOT));
+            if (!messageColor.isColor()) throw new IllegalArgumentException("Expected a message color: "+id);
             String label=ChatColor.translateAlternateColorCodes('&',value.getString("label",id));
             if (label.length()>52 || label.contains("%") || label.contains("\n")) throw new IllegalArgumentException("Rank label too long or invalid: "+id);
-            ranks.add(new Rank(id,Set.copyOf(groups),priority,label,color,glyph));
+            ranks.add(new Rank(id,Set.copyOf(groups),priority,label,color,messageColor,glyph));
         }
         if (ranks.stream().noneMatch(rank->rank.id.equals("oyuncu"))) throw new IllegalArgumentException("oyuncu fallback is required");
         ranks.sort(Comparator.comparingInt(Rank::priority).reversed().thenComparing(Rank::id));
@@ -47,9 +49,13 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
                 .orElseGet(()->ranked.stream().filter(rank->rank.id.equals("oyuncu")).findFirst().orElseThrow());
     }
     public static String chatFormat(String template,String prefix,String nickname) {
+        return chatFormat(template,prefix,nickname,null);
+    }
+    public static String chatFormat(String template,String prefix,String nickname,ChatColor messageColor) {
         // Escape injected percent signs before Java's chat formatter processes %2$s.
         String marker="\u0001MESSAGE\u0001";
-        String format=template.replace("{message}",marker).replace("{tag}",prefix).replace("{name}",whiteName(nickname));
+        String coloredMarker=(messageColor==null?"":messageColor.toString())+marker;
+        String format=template.replace("{message}",coloredMarker).replace("{tag}",prefix).replace("{name}",whiteName(nickname));
         format=ChatColor.translateAlternateColorCodes('&',format).replace("%","%%");
         return format.replace(marker,"%2$s");
     }
