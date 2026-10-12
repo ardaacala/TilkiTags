@@ -6,7 +6,7 @@ TilkiCraft için 17 özgün piksel rozet: sohbet, TAB oyuncu listesi ve oyuncunu
 
 ## Kurulum
 
-1. Sunucuyu durdur, `TilkiTags-1.3.3.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
+1. Sunucuyu durdur, `TilkiTags-1.3.4.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
 2. Yönetici olarak `/tilkitags setup` çalıştır. 17 kozmetik grup hazırlanır. Mevcut grup üyelikleri veya yetkileri silinmez; gruplara yönetici/Essentials/oyun yetkileri eklenmez. Bunları LuckPerms'te ayrıca yönetirsin.
 3. Grup ata: `/lp user Arda parent add vipplus` veya `/lp user Arda parent add tilki`. `parent add` mevcut başka grupları korur. Kaldırmak için `parent remove <grup>` kullan.
 4. Oyuncu rozet paketini kabul eder; ZIP hazır GitHub bağlantısından indirilir. Sunucuya ZIP koymak gerekmez. Paket varsayılan olarak zorunludur.
@@ -60,7 +60,7 @@ Essentials'ın chat işleyişi kaynağı: https://github.com/EssentialsX/Essenti
 
 ## Kaynak paketi ve uyumluluk
 
-- Rozetler özgün, statik 32x32 piksel simgelerdir; 9 px yüksekliğinde font glifi olarak gösterilir. Tasarım önizlemesi simgeleri büyüterek gösterir. `EB00–EB10` ve `tilkitags:badges` namespace'i kullanılır. 256x256 font atlası sınırına uyulur; Unicode font desteği vardır.
+- Rozetler [referans sayfasından](art/tags-source.jpg) kesilen, simgesi ve yazısı tek parça dokulardır; 45 piksel yükseklikte (5x HD) saklanır ve tam bir sohbet satırı olan 9 px yükseklikte font glifi olarak gösterilir. `EB00–EB10` ve `tilkitags:badges` namespace'i kullanılır. 256x256 font atlası sınırına uyulur; Unicode font desteği vardır.
 - CombatGuns, TilkiLoginScreen ve TilkiStatsHUD paketlerinin yanına ayrı UUID ile eklenir. Varsayılan istek gecikmesi 140 tick. Title, scope, crosshair veya bossbar'a yazılmaz.
 - Paketi indirmemiş oyuncuya kutu göstermek yerine yazılı tag kullanılır. TAB adı global olduğu için herkesin paketi yüklenene kadar TAB'da metin tagları kullanılır. Sohbette yalnızca mesajın tüm alıcıları hazırsa rozet eklenir. Aynı scoreboard'u paylaşan izleyicilerin hepsi hazırsa o board'da rozet açılır.
 - İsim üstü için oyuncuların o an kullandığı scoreboard'lara yalnızca TilkiTags takımları eklenir. TilkiStatsHUD'ın scoreboard'u değiştirilmez; yeni board oluşturulunca sonraki yenilemede taglar eklenir.
@@ -83,6 +83,10 @@ TilkiStatsHUD 1.0.1 ile aynı rozet sidebar rütbe satırında ve üst şeritte 
 Güncelleme: sunucuyu durdur, eski TilkiTags ve TilkiStatsHUD JAR'larını kaldırıp yenilerini koy, yeniden başlat ve oyuna yeniden gir. Mevcut gruplar, üyelikler ve ayarlar korunur. Eski resmi tag paketi URL/SHA1 bilgileri otomatik güncellenir; özel hosting kullanıyorsan yeni ZIP/hash bilgilerini sen güncellemelisin. Gruplar zaten varsa setup tekrar gerekmez. Baked rozet içindeki yazı değişecekse BuildTagsPack.java ile doku yeniden üretilmelidir; config label alanı metin fallback'ini değiştirir.
 
 Doğrulama: 5 rank/glyph/format testi, HUD tarafında 4 test (rozet API sözleşmesi dahil), PNG/JSON/font/ZIP/SHA1 kontrolleri. Canlı istemci görünümü henüz doğrulanmadı.
+
+## 1.3.4 — Referans rozetleri, taşmasız sohbet
+
+17 rozet gönderilen [rozet sayfasından](art/tags-source.jpg) birebir kesilir: koyu zemin kenarlardan temizlenir, rozet kırpılır ve 45 piksel yüksekliğe premultiplied alfa ile küçültülür. Tilki dahil tüm rozetler 9 piksel yükseklik ve 8 ascent kullanır. Bu bir sohbet satırının tamamıdır: rozet olabildiğince büyüktür ama üst veya alt satıra taşmaz. 1.3.3'teki 11 piksellik Tilki rozeti üst satıra biniyordu. [Önizleme](art/tags-preview.png) GUI ölçeği 3'te ardışık sohbet satırlarını simüle eder.
 
 ## 1.3.3 — Büyük Tilki etiketi ve özel turuncu
 

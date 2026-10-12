@@ -115,8 +115,40 @@ class BuildTagsPack {
         draw.setColor(index==16?new Color(0xffeeb7):Color.WHITE);draw.drawString(LABELS[index],14f,7.1f);
         draw.dispose();image.setRGB(0,0,0);image.setRGB(width*3-1,0,0x01ffffff);return image;
     }
+    // A chat line is nine pixels; taller glyphs would cover the neighbouring lines.
+    static final int LINE_HEIGHT=9,SHEET_OVERSAMPLE=5;
+    /** Cuts the 17 stacked badges, in IDS order, out of the dark reference sheet. */
+    static List<BufferedImage> sheetBadges(Path path) throws Exception {
+        BufferedImage source=ImageIO.read(path.toFile());if(source==null)throw new IllegalArgumentException("Invalid badge sheet");
+        List<int[]> rows=new ArrayList<>();int start=-1;
+        for(int y=0;y<=source.getHeight();y++) {
+            int lit=0;if(y<source.getHeight())for(int x=0;x<source.getWidth();x++)if(bright(source.getRGB(x,y)))lit++;
+            if(lit>3&&start<0)start=y;
+            if(lit<=3&&start>=0){rows.add(new int[]{start,y});start=-1;}
+        }
+        if(rows.size()!=IDS.length)throw new IllegalStateException("Expected "+IDS.length+" badges in sheet, found "+rows.size());
+        List<BufferedImage> badges=new ArrayList<>();
+        for(int[] row:rows) {
+            int minX=source.getWidth(),maxX=0;
+            for(int y=row[0];y<row[1];y++)for(int x=0;x<source.getWidth();x++)if(bright(source.getRGB(x,y))){minX=Math.min(minX,x);maxX=Math.max(maxX,x);}
+            int top=Math.max(0,row[0]-3),bottom=Math.min(source.getHeight(),row[1]+3);minX=Math.max(0,minX-3);maxX=Math.min(source.getWidth()-1,maxX+3);
+            badges.add(lineBadge(transparentBackground(source.getSubimage(minX,top,maxX-minX+1,bottom-top))));
+        }
+        return badges;
+    }
     static BufferedImage customTilkiBadge(Path path) throws Exception {
         BufferedImage source=ImageIO.read(path.toFile());if(source==null)throw new IllegalArgumentException("Invalid Tilki badge PNG");
+        return lineBadge(transparentBackground(source));
+    }
+    /** Scales trimmed artwork to one HD chat line and forces the full advance width. */
+    static BufferedImage lineBadge(BufferedImage cut) {
+        int targetHeight=LINE_HEIGHT*SHEET_OVERSAMPLE,targetWidth=Math.min(255,(int)Math.round(cut.getWidth()*(double)targetHeight/cut.getHeight()));
+        BufferedImage badge=areaScale(cut,targetWidth,targetHeight);
+        badge.setRGB(0,0,0);badge.setRGB(targetWidth-1,0,0x01ffffff);return badge;
+    }
+    static boolean bright(int pixel) {return Math.max((pixel>>16)&255,Math.max((pixel>>8)&255,pixel&255))>60;}
+    /** Removes the background reachable from the edges and trims to the remaining artwork. */
+    static BufferedImage transparentBackground(BufferedImage source) {
         int width=source.getWidth(),height=source.getHeight(),background=source.getRGB(0,0),br=(background>>16)&255,bg=(background>>8)&255,bb=background&255;
         boolean[] outside=new boolean[width*height];ArrayDeque<Point> queue=new ArrayDeque<>();
         for(int x=0;x<width;x++){queue.add(new Point(x,0));queue.add(new Point(x,height-1));}
@@ -124,29 +156,48 @@ class BuildTagsPack {
         while(!queue.isEmpty()) {
             Point point=queue.removeFirst();int x=point.x,y=point.y,index=y*width+x;if(outside[index])continue;
             int pixel=source.getRGB(x,y),r=(pixel>>16)&255,green=(pixel>>8)&255,b=pixel&255;
-            if(Math.max(Math.max(Math.abs(r-br),Math.abs(green-bg)),Math.abs(b-bb))>34)continue;
+            if(Math.max(Math.max(Math.abs(r-br),Math.abs(green-bg)),Math.abs(b-bb))>30)continue;
             outside[index]=true;
             if(x>0)queue.add(new Point(x-1,y));if(x+1<width)queue.add(new Point(x+1,y));if(y>0)queue.add(new Point(x,y-1));if(y+1<height)queue.add(new Point(x,y+1));
         }
         int minX=width,minY=height,maxX=0,maxY=0;
         for(int y=0;y<height;y++)for(int x=0;x<width;x++)if(!outside[y*width+x]){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
-        int cropWidth=maxX-minX+1,cropHeight=maxY-minY+1,targetHeight=33,targetWidth=Math.min(255,(int)Math.round(cropWidth*(double)targetHeight/cropHeight));
-        BufferedImage transparent=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
-        for(int y=0;y<height;y++)for(int x=0;x<width;x++)if(!outside[y*width+x])transparent.setRGB(x,y,source.getRGB(x,y)|0xff000000);
-        BufferedImage result=new BufferedImage(targetWidth,targetHeight,BufferedImage.TYPE_INT_ARGB);Graphics2D draw=result.createGraphics();
-        draw.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);draw.drawImage(transparent,0,0,targetWidth,targetHeight,minX,minY,maxX+1,maxY+1,null);draw.dispose();
-        result.setRGB(targetWidth-1,0,0x01ffffff);return result;
+        BufferedImage result=new BufferedImage(maxX-minX+1,maxY-minY+1,BufferedImage.TYPE_INT_ARGB);
+        for(int y=minY;y<=maxY;y++)for(int x=minX;x<=maxX;x++)if(!outside[y*width+x])result.setRGB(x-minX,y-minY,source.getRGB(x,y)|0xff000000);
+        return result;
+    }
+    /** Box-filter downscale with premultiplied alpha, so cut edges stay clean. */
+    static BufferedImage areaScale(BufferedImage source,int width,int height) {
+        BufferedImage result=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+        double sx=source.getWidth()/(double)width,sy=source.getHeight()/(double)height;
+        for(int y=0;y<height;y++)for(int x=0;x<width;x++) {
+            double a=0,r=0,g=0,b=0,total=0;
+            for(int yy=(int)(y*sy);yy<Math.min(source.getHeight(),Math.ceil((y+1)*sy));yy++) {
+                double wy=Math.min(yy+1,(y+1)*sy)-Math.max(yy,y*sy);
+                for(int xx=(int)(x*sx);xx<Math.min(source.getWidth(),Math.ceil((x+1)*sx));xx++) {
+                    double weight=wy*(Math.min(xx+1,(x+1)*sx)-Math.max(xx,x*sx));int pixel=source.getRGB(xx,yy);double alpha=((pixel>>>24)/255.0)*weight;
+                    a+=alpha;r+=((pixel>>16)&255)*alpha;g+=((pixel>>8)&255)*alpha;b+=(pixel&255)*alpha;total+=weight;
+                }
+            }
+            int alpha=(int)Math.round(255*a/total);
+            // The text shader discards nearly transparent pixels anyway.
+            if(alpha<26){result.setRGB(x,y,0);continue;}
+            result.setRGB(x,y,(alpha<<24)|((int)Math.round(r/a)<<16)|((int)Math.round(g/a)<<8)|(int)Math.round(b/a));
+        }
+        return result;
     }
     public static void main(String[] args) throws Exception {
         Path root=Path.of("resourcepack");
         Path textures=root.resolve("assets/tilkitags/textures/font");Files.createDirectories(textures);
         List<String> providers=new ArrayList<>();List<BufferedImage> icons=new ArrayList<>();
+        Path sheet=Path.of("art/tags-source.jpg");
+        List<BufferedImage> fromSheet=Files.isRegularFile(sheet)?sheetBadges(sheet):null;
         for(int i=0;i<IDS.length;i++) {
             Path texture=textures.resolve(IDS[i]+".png");
-            BufferedImage image=i==16||!Files.isRegularFile(texture)?badge(i):ImageIO.read(texture.toFile());
+            BufferedImage image=fromSheet!=null?fromSheet.get(i):i==16||!Files.isRegularFile(texture)?badge(i):ImageIO.read(texture.toFile());
             icons.add(image);ImageIO.write(image,"png",texture.toFile());
-            int logicalHeight=i==16?11:9,ascent=i==16?10:8;
-            providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":"+logicalHeight+",\"ascent\":"+ascent+",\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
+            // Every badge fills exactly one chat line, so neighbouring lines never overlap.
+            providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":"+LINE_HEIGHT+",\"ascent\":"+(LINE_HEIGHT-1)+",\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
         }
         write(root,"pack.mcmeta","{\"pack\":{\"pack_format\":46,\"description\":\"TilkiCraft - 17 original rank badges | 1.21.4\"}}\n");
         write(root,"assets/tilkitags/font/badges.json","{\"providers\":["+String.join(",",providers)+"]}\n");
@@ -162,10 +213,15 @@ class BuildTagsPack {
         BufferedImage preview=new BufferedImage(1200,680,BufferedImage.TYPE_INT_RGB);g=preview.createGraphics();
         rect(0x181b23,0,0,1200,680);g.setFont(new Font("SansSerif",Font.BOLD,26));color(0xffb04e);g.drawString("TILKICRAFT • RÜTBE ROZETLERİ",30,44);
         g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xaab1c2);g.drawString("17 özgün piksel simge • Sohbet / TAB / Oyuncu üstü • Tasarım önizlemesi",30,72);
+        // Chat simulation at GUI scale 3: consecutive 27 px lines must not overlap.
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         for(int i=0;i<17;i++) {
-            int x=25+i%4*295,y=100+i/4*110;rect(0x242936,x,y,280,96);rect(COLORS[i],x,y,3,96);
-            g.drawImage(icons.get(i),x+12,y+13,icons.get(i).getWidth(),27,null);
-            g.setFont(new Font("SansSerif",Font.PLAIN,15));color(0xdce0e8);g.drawString("Arda  »  Merhaba!",x+12,y+70);
+            int x=30+i/9*590,y=100+i%9*LINE_HEIGHT*3,scaledWidth=icons.get(i).getWidth()*LINE_HEIGHT*3/icons.get(i).getHeight();
+            g.setColor(new Color(0,0,0,i%2==0?120:90));g.fillRect(x-6,y,560,LINE_HEIGHT*3);
+            g.setFont(new Font("SansSerif",Font.BOLD,19));color(0xaaaaaa);g.drawString("12 ▪",x,y+21);
+            g.drawImage(icons.get(i),x+48,y,scaledWidth,LINE_HEIGHT*3,null);
+            color(0xffffff);g.drawString("Arda",x+56+scaledWidth,y+21);color(0x555555);g.drawString("»",x+106+scaledWidth,y+21);color(0xffffff);g.drawString("Merhaba!",x+124+scaledWidth,y+21);
         }
         g.dispose();Files.createDirectories(Path.of("art"));ImageIO.write(preview,"png",Path.of("art/tags-preview.png").toFile());
         System.out.println("Built 17 rank badges. SHA1: "+hash);
