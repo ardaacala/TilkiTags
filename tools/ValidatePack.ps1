@@ -5,9 +5,12 @@ Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 foreach ($file in (Get-ChildItem $root -Recurse -File | Where-Object { $_.Extension -eq '.json' -or $_.Extension -eq '.mcmeta' })) { $null = [IO.File]::ReadAllText($file.FullName) | ConvertFrom-Json }
 $font = [IO.File]::ReadAllText((Join-Path $root 'assets/tilkitags/font/badges.json')) | ConvertFrom-Json
-if ($font.providers.Count -ne 17) { throw 'Expected 17 rank badges' }
+$bitmaps = @($font.providers | Where-Object { $_.type -eq 'bitmap' })
+if ($bitmaps.Count -ne 18) { throw 'Expected 17 rank badges and the compact Tilki badge' }
+$spaces = @($font.providers | Where-Object { $_.type -eq 'space' })
+if ($spaces.Count -ne 1 -or @($spaces[0].advances.PSObject.Properties).Count -ne 8) { throw 'TAB padding spaces missing' }
 $glyphs = @{}
-foreach ($provider in $font.providers) {
+foreach ($provider in $bitmaps) {
     $texture = Join-Path $root ('assets/tilkitags/textures/' + $provider.file.Substring('tilkitags:'.Length))
     $bitmap = [Drawing.Bitmap]::new($texture)
     try {
@@ -22,7 +25,7 @@ foreach ($provider in $font.providers) {
         if ($bitmap.GetPixel(0,0).A -ne 0) { throw 'Missing transparent icon margin' }
     } finally { $bitmap.Dispose() }
 }
-foreach ($codepoint in 0xeb00..0xeb10) { if (!$glyphs.ContainsKey($codepoint)) { throw 'Missing badge glyph' } }
+foreach ($codepoint in 0xeb00..0xeb11) { if (!$glyphs.ContainsKey($codepoint)) { throw 'Missing badge glyph' } }
 foreach ($name in @('default','uniform')) {
     $definition = [IO.File]::ReadAllText((Join-Path $root ('assets/minecraft/font/'+$name+'.json'))) | ConvertFrom-Json
     if ($definition.providers[0].id -ne 'tilkitags:badges') { throw 'Font reference missing' }
@@ -31,9 +34,9 @@ $zipPath = Join-Path $projectRoot 'dist/TilkiTags-ResourcePack.zip'
 $zip = [IO.Compression.ZipFile]::OpenRead($zipPath)
 try {
     if (!$zip.GetEntry('pack.mcmeta') -or !$zip.GetEntry('assets/tilkitags/font/badges.json')) { throw 'Invalid ZIP root' }
-    if ($zip.Entries.Count -ne 21) { throw 'Unexpected ZIP entry count' }
+    if ($zip.Entries.Count -ne 22) { throw 'Unexpected ZIP entry count' }
 } finally { $zip.Dispose() }
 $hash = (Get-FileHash $zipPath -Algorithm SHA1).Hash.ToLowerInvariant()
 if ($hash -ne ([IO.File]::ReadAllText((Join-Path $projectRoot 'dist/resourcepack-sha1.txt'))).Trim()) { throw 'SHA1 mismatch' }
 if (!([IO.File]::ReadAllText((Join-Path $projectRoot 'src/main/resources/config.yml'))).Contains($hash)) { throw 'Default pack hash mismatch' }
-Write-Output 'VALID: 17 reference badge textures, one-line chat height, taller Tilki, glyph baselines, fonts, ZIP and SHA1.'
+Write-Output 'VALID: 17 reference badge textures, one-line chat height, taller chat Tilki, compact TAB Tilki, padding spaces, glyph baselines, fonts, ZIP and SHA1.'

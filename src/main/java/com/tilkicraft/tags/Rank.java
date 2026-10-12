@@ -32,6 +32,10 @@ public record Rank(String id, Set<String> groups, int priority, String label, Ch
     public static String whiteName(String nickname) {
         return ChatColor.WHITE+ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',nickname));
     }
+    /** One-line badge for 9 px rows (TAB list, sidebar); only Tilki has a taller chat variant. */
+    public String compactBadge() {
+        return ChatColor.WHITE.toString()+(glyph==16?'':(char)(0xeb00+glyph))+ChatColor.RESET;
+    }
     public static String cleanLevel(String value) {
         if(value==null) return "0";
         value=ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&',value)).trim();

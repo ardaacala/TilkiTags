@@ -6,7 +6,7 @@ TilkiCraft için 17 özgün piksel rozet: sohbet, TAB oyuncu listesi ve oyuncunu
 
 ## Kurulum
 
-1. Sunucuyu durdur, `TilkiTags-1.3.5.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
+1. Sunucuyu durdur, `TilkiTags-1.3.6.jar` dosyasını `plugins` klasörüne koy ve yeniden başlat. LuckPerms kurulu olmalı.
 2. Yönetici olarak `/tilkitags setup` çalıştır. 17 kozmetik grup hazırlanır. Mevcut grup üyelikleri veya yetkileri silinmez; gruplara yönetici/Essentials/oyun yetkileri eklenmez. Bunları LuckPerms'te ayrıca yönetirsin.
 3. Grup ata: `/lp user Arda parent add vipplus` veya `/lp user Arda parent add tilki`. `parent add` mevcut başka grupları korur. Kaldırmak için `parent remove <grup>` kullan.
 4. Oyuncu rozet paketini kabul eder; ZIP hazır GitHub bağlantısından indirilir. Sunucuya ZIP koymak gerekmez. Paket varsayılan olarak zorunludur.
@@ -83,6 +83,10 @@ TilkiStatsHUD 1.0.1 ile aynı rozet sidebar rütbe satırında ve üst şeritte 
 Güncelleme: sunucuyu durdur, eski TilkiTags ve TilkiStatsHUD JAR'larını kaldırıp yenilerini koy, yeniden başlat ve oyuna yeniden gir. Mevcut gruplar, üyelikler ve ayarlar korunur. Eski resmi tag paketi URL/SHA1 bilgileri otomatik güncellenir; özel hosting kullanıyorsan yeni ZIP/hash bilgilerini sen güncellemelisin. Gruplar zaten varsa setup tekrar gerekmez. Baked rozet içindeki yazı değişecekse BuildTagsPack.java ile doku yeniden üretilmelidir; config label alanı metin fallback'ini değiştirir.
 
 Doğrulama: 5 rank/glyph/format testi, HUD tarafında 4 test (rozet API sözleşmesi dahil), PNG/JSON/font/ZIP/SHA1 kontrolleri. Canlı istemci görünümü henüz doğrulanmadı.
+
+## 1.3.6 — Sabit genişlikli TAB adları
+
+TAB'da her ad, `tab.name-width` (varsayılan 140 px) genişliğine görünmez boşluk glifleriyle tamamlanır: solda tek satırlık rozet ve ad, sağda ada seviyesi. Böylece TilkiInterface'in TAB çerçevesi sütunlarla hizalanır. TAB ve yan panelde Tilki için 9 px'lik küçük rozet (`EB11`) kullanılır; sohbetteki 14 px'lik büyük rozet değişmez. Genişlikler paket ASCII atlasından ve üretilen `badge-widths.properties` dosyasından hesaplanır. Yeni API: `getRankId(Player)` (AuraCosmetics rütbe erişimi), `getTextWidth(String)`, `getTabNameWidth()`.
 
 ## 1.3.5 — Büyük Tilki rozeti
 

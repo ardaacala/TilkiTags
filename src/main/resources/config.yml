@@ -6,14 +6,16 @@ chat:
   # Sadece görünen biçim değiştirilir; çift prefix oluşmaması için tek tag kullanılır.
   format: '{tag}{name}&8 » &f{message}'
 tab:
+  # TilkiInterface TAB çerçevesi bu genişliğe göre çizilir; isimler bu genişliğe tamamlanır.
+  name-width: 140
   enabled: true
 nametag:
   enabled: true
   # Başka eklentinin nametag/collision takımını sessizce bozma.
   respect-existing-teams: true
 pack:
-  url: 'https://github.com/ardaacala/TilkiTags/releases/download/v1.3.5/TilkiTags-ResourcePack.zip'
-  sha1: 'a73ba664eeaf9a64e8cb979431e39a82f9e14efb'
+  url: 'https://github.com/ardaacala/TilkiTags/releases/download/v1.3.6/TilkiTags-ResourcePack.zip'
+  sha1: '669e377ae12f8e05b61b4e9f9db2183d723d1d9d'
   required: true
   delay-ticks: 140
   prompt: 'TilkiCraft rütbe rozetlerini yükle.'

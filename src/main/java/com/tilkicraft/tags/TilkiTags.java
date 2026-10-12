@@ -44,9 +44,9 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
     }
     private void readSettings() {
         String previousUrl=getConfig().getString("pack.url","");
-        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.5/")) {
-            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.5/TilkiTags-ResourcePack.zip");
-            getConfig().set("pack.sha1","a73ba664eeaf9a64e8cb979431e39a82f9e14efb");
+        if (previousUrl.startsWith("https://github.com/ardaacala/TilkiTags/releases/download/") && !previousUrl.contains("/v1.3.6/")) {
+            getConfig().set("pack.url","https://github.com/ardaacala/TilkiTags/releases/download/v1.3.6/TilkiTags-ResourcePack.zip");
+            getConfig().set("pack.sha1","669e377ae12f8e05b61b4e9f9db2183d723d1d9d");
             saveConfig();
         }
         if (getConfig().isConfigurationSection("ranks.tilki") && !"&6&lTilki".equals(getConfig().getString("ranks.tilki.label"))) {
@@ -106,11 +106,31 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
         }
         return Rank.choose(ranks,memberships,nodes);
     }
-    /** A stable image badge, independent of other viewers loading their packs. */
+    /** The player's displayed rank id (e.g. "tilki", "vipplus"), for cosmetics such as AuraCosmetics. */
+    public String getRankId(Player player) {
+        Identity identity=identities.get(player.getUniqueId());
+        return (identity==null?resolve(player):identity.rank()).id();
+    }
+    /** A stable one-line image badge for HUD rows, independent of other viewers loading their packs. */
     public String getRankBadge(Player subject,Player viewer) {
         Identity identity=identities.get(subject.getUniqueId());
         Rank rank=identity==null?resolve(subject):identity.rank();
-        return rank.badge(true);
+        return rank.compactBadge();
+    }
+    /** Client width of text in the TilkiCraft pack, for HUD layouts. */
+    public int getTextWidth(String text) { return TextWidth.width(text); }
+    /** Every TAB name is padded to exactly this width so a TAB frame can line up with the columns. */
+    public int getTabNameWidth() { return Math.max(60,Math.min(240,getConfig().getInt("tab.name-width",140))); }
+    /**
+     * TAB entry: compact badge and name on the left, island level right-aligned,
+     * padded to the fixed name width.
+     */
+    private String tabName(Identity identity) {
+        String badge=identity.rank().compactBadge()+" ", level="§7"+identity.islandLevel();
+        int width=getTabNameWidth(), fixed=TextWidth.width(badge)+TextWidth.width(level)+4;
+        String name=TextWidth.fit(identity.nickname(),width-fixed);
+        int used=TextWidth.width(badge)+TextWidth.width(name)+TextWidth.width(level);
+        return badge+name+TextWidth.pad(Math.max(0,width-used))+level;
     }
     private void refresh() {
         List<Player> online=new ArrayList<>(Bukkit.getOnlinePlayers());
@@ -121,7 +141,7 @@ public final class TilkiTags extends JavaPlugin implements Listener, CommandExec
             identities.put(id,new Identity(rank,nickname(player),islandLevel(player))); onlineNames.add(player.getName());
             if (getConfig().getBoolean("tab.enabled",true)) {
                 oldTab.putIfAbsent(id,player.getPlayerListName());
-                String value=identityPrefix(identities.get(id),true)+identities.get(id).nickname();
+                String value=tabName(identities.get(id));
                 if (!value.equals(player.getPlayerListName())) player.setPlayerListName(value);
                 lastTab.put(id,value);
             }
