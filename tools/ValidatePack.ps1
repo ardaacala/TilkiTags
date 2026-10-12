@@ -13,8 +13,9 @@ foreach ($provider in $font.providers) {
     try {
         if ($provider.chars.Count -ne 1 -or $provider.chars[0].Length -ne 1) { throw 'Expected one glyph per texture' }
         if ($bitmap.Width -gt 256 -or $bitmap.Height -gt 256) { throw 'Bitmap exceeds client font atlas' }
-        # Nine pixels is one chat line; anything taller overlaps the neighbouring lines.
-        if ($provider.height -ne 9 -or $provider.ascent -ne 8) { throw 'Badge does not fit one chat line' }
+        # Rank badges fill one 9 px chat line; the Tilki badge is 14 px on purpose and rises above it.
+        $expected=if($provider.file -eq 'tilkitags:font/tilki.png'){14}else{9}
+        if ($provider.height -ne $expected -or $provider.ascent -ne $expected-1) { throw 'Badge height or baseline invalid' }
         $character = [int][char]$provider.chars[0]
         if ($glyphs.ContainsKey($character)) { throw 'Duplicate glyph' }
         $glyphs[$character]=$true
@@ -35,4 +36,4 @@ try {
 $hash = (Get-FileHash $zipPath -Algorithm SHA1).Hash.ToLowerInvariant()
 if ($hash -ne ([IO.File]::ReadAllText((Join-Path $projectRoot 'dist/resourcepack-sha1.txt'))).Trim()) { throw 'SHA1 mismatch' }
 if (!([IO.File]::ReadAllText((Join-Path $projectRoot 'src/main/resources/config.yml'))).Contains($hash)) { throw 'Default pack hash mismatch' }
-Write-Output 'VALID: 17 reference badge textures, one-line chat height, glyph baselines, fonts, ZIP and SHA1.'
+Write-Output 'VALID: 17 reference badge textures, one-line chat height, taller Tilki, glyph baselines, fonts, ZIP and SHA1.'

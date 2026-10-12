@@ -115,8 +115,10 @@ class BuildTagsPack {
         draw.setColor(index==16?new Color(0xffeeb7):Color.WHITE);draw.drawString(LABELS[index],14f,7.1f);
         draw.dispose();image.setRGB(0,0,0);image.setRGB(width*3-1,0,0x01ffffff);return image;
     }
-    // A chat line is nine pixels; taller glyphs would cover the neighbouring lines.
-    static final int LINE_HEIGHT=9,SHEET_OVERSAMPLE=5;
+    // A chat line is nine pixels; the rank badges fill exactly one line. The Tilki
+    // badge keeps the reference artwork and is taller on purpose: it rises above its
+    // line (bottom stays on the baseline) so the crowned fox stays readable.
+    static final int LINE_HEIGHT=9,TILKI_HEIGHT=14,SHEET_OVERSAMPLE=5;
     /** Cuts the 17 stacked badges, in IDS order, out of the dark reference sheet. */
     static List<BufferedImage> sheetBadges(Path path) throws Exception {
         BufferedImage source=ImageIO.read(path.toFile());if(source==null)throw new IllegalArgumentException("Invalid badge sheet");
@@ -132,17 +134,18 @@ class BuildTagsPack {
             int minX=source.getWidth(),maxX=0;
             for(int y=row[0];y<row[1];y++)for(int x=0;x<source.getWidth();x++)if(bright(source.getRGB(x,y))){minX=Math.min(minX,x);maxX=Math.max(maxX,x);}
             int top=Math.max(0,row[0]-3),bottom=Math.min(source.getHeight(),row[1]+3);minX=Math.max(0,minX-3);maxX=Math.min(source.getWidth()-1,maxX+3);
-            badges.add(lineBadge(transparentBackground(source.getSubimage(minX,top,maxX-minX+1,bottom-top))));
+            BufferedImage cut=transparentBackground(source.getSubimage(minX,top,maxX-minX+1,bottom-top));
+            badges.add(lineBadge(cut,badges.size()==16?TILKI_HEIGHT:LINE_HEIGHT));
         }
         return badges;
     }
     static BufferedImage customTilkiBadge(Path path) throws Exception {
         BufferedImage source=ImageIO.read(path.toFile());if(source==null)throw new IllegalArgumentException("Invalid Tilki badge PNG");
-        return lineBadge(transparentBackground(source));
+        return lineBadge(transparentBackground(source),TILKI_HEIGHT);
     }
-    /** Scales trimmed artwork to one HD chat line and forces the full advance width. */
-    static BufferedImage lineBadge(BufferedImage cut) {
-        int targetHeight=LINE_HEIGHT*SHEET_OVERSAMPLE,targetWidth=Math.min(255,(int)Math.round(cut.getWidth()*(double)targetHeight/cut.getHeight()));
+    /** Scales trimmed artwork to the given logical height in HD and forces the full advance width. */
+    static BufferedImage lineBadge(BufferedImage cut,int height) {
+        int targetHeight=height*SHEET_OVERSAMPLE,targetWidth=Math.min(255,(int)Math.round(cut.getWidth()*(double)targetHeight/cut.getHeight()));
         BufferedImage badge=areaScale(cut,targetWidth,targetHeight);
         badge.setRGB(0,0,0);badge.setRGB(targetWidth-1,0,0x01ffffff);return badge;
     }
@@ -197,7 +200,9 @@ class BuildTagsPack {
             BufferedImage image=fromSheet!=null?fromSheet.get(i):i==16||!Files.isRegularFile(texture)?badge(i):ImageIO.read(texture.toFile());
             icons.add(image);ImageIO.write(image,"png",texture.toFile());
             // Every badge fills exactly one chat line, so neighbouring lines never overlap.
-            providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":"+LINE_HEIGHT+",\"ascent\":"+(LINE_HEIGHT-1)+",\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
+            // Bottom on the line baseline (glyph top = baseline + 7 - ascent); extra height rises above.
+            int height=i==16?TILKI_HEIGHT:LINE_HEIGHT;
+            providers.add("{\"type\":\"bitmap\",\"file\":\"tilkitags:font/"+IDS[i]+".png\",\"height\":"+height+",\"ascent\":"+(height-1)+",\"chars\":[\"\\u"+String.format("%04x",0xeb00+i)+"\"]}");
         }
         write(root,"pack.mcmeta","{\"pack\":{\"pack_format\":46,\"description\":\"TilkiCraft - 17 original rank badges | 1.21.4\"}}\n");
         write(root,"assets/tilkitags/font/badges.json","{\"providers\":["+String.join(",",providers)+"]}\n");
@@ -217,10 +222,10 @@ class BuildTagsPack {
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         for(int i=0;i<17;i++) {
-            int x=30+i/9*590,y=100+i%9*LINE_HEIGHT*3,scaledWidth=icons.get(i).getWidth()*LINE_HEIGHT*3/icons.get(i).getHeight();
+            int x=30+i/9*590,y=100+i%9*LINE_HEIGHT*3,badgeHeight=(i==16?TILKI_HEIGHT:LINE_HEIGHT)*3,scaledWidth=icons.get(i).getWidth()*badgeHeight/icons.get(i).getHeight();
             g.setColor(new Color(0,0,0,i%2==0?120:90));g.fillRect(x-6,y,560,LINE_HEIGHT*3);
             g.setFont(new Font("SansSerif",Font.BOLD,19));color(0xaaaaaa);g.drawString("12 ▪",x,y+21);
-            g.drawImage(icons.get(i),x+48,y,scaledWidth,LINE_HEIGHT*3,null);
+            g.drawImage(icons.get(i),x+48,y+LINE_HEIGHT*3-badgeHeight,scaledWidth,badgeHeight,null);
             color(0xffffff);g.drawString("Arda",x+56+scaledWidth,y+21);color(0x555555);g.drawString("»",x+106+scaledWidth,y+21);color(0xffffff);g.drawString("Merhaba!",x+124+scaledWidth,y+21);
         }
         g.dispose();Files.createDirectories(Path.of("art"));ImageIO.write(preview,"png",Path.of("art/tags-preview.png").toFile());
